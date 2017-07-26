@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Asteroid</string>
+    <string name="hint_start">Press to Start</string>
+</resources>
