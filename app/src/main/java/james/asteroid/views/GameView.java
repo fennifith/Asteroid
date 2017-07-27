@@ -46,14 +46,19 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
     private float shipRotation;
 
     private Bitmap asteroidBitmap;
+    private Bitmap asteroidBitmap2;
     private List<Asteroid> asteroids;
     private long asteroidTime, asteroidLength;
+
+    private List<Projectile> projectiles;
+    private long projectileTime;
 
     private List<Particle> particles;
 
     private ValueAnimator animator;
     private GameListener listener;
     private boolean isPlaying;
+    private int score;
 
     public GameView(Context context) {
         this(context, null);
@@ -75,9 +80,12 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
         particles = new ArrayList<>();
         particles.add(new Particle());
 
+        projectiles = new ArrayList<>();
+
         shipBitmap = tintBitmap(getBitmap(R.drawable.ic_ship));
 
         asteroidBitmap = tintBitmap(getBitmap(R.drawable.ic_asteroid));
+        asteroidBitmap2 = tintBitmap(getBitmap(R.drawable.ic_asteroid_two));
         asteroids = new ArrayList<>();
     }
 
@@ -136,9 +144,9 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
 
                 for (Asteroid asteroid : new ArrayList<>(asteroids)) {
                     Matrix matrix = asteroid.next(canvas.getWidth(), canvas.getHeight());
-                    if (matrix != null)
-                        canvas.drawBitmap(asteroidBitmap, matrix, paint);
-                    else {
+                    if (matrix != null) {
+                        canvas.drawBitmap(asteroid.asteroidBitmap, matrix, paint);
+                    } else {
                         asteroids.remove(asteroid);
                         asteroidLength -= (asteroidLength * 0.1);
                         new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -153,7 +161,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
 
                 if (isPlaying() && System.currentTimeMillis() - asteroidTime > asteroidLength) {
                     asteroidTime = System.currentTimeMillis();
-                    asteroids.add(new Asteroid(asteroidBitmap));
+                    asteroids.add(new Asteroid(Math.round(Math.random()) == 0 ? asteroidBitmap : asteroidBitmap2));
                 }
 
                 float left = canvas.getWidth() * shipPositionX;
@@ -171,6 +179,29 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                         (int) left + (shipBitmap.getWidth() / 2),
                         (int) top + (shipBitmap.getWidth() / 2)
                 );
+
+                for (Projectile projectile : new ArrayList<>(projectiles)) {
+                    Rect rect = projectile.next(canvas.getWidth(), canvas.getHeight());
+                    if (rect != null) {
+                        for (Asteroid asteroid : new ArrayList<>(asteroids)) {
+                            if (isPlaying && asteroid.position != null && rect.intersect(asteroid.position)) {
+                                projectiles.remove(projectile);
+                                asteroids.remove(asteroid);
+
+                                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (listener != null)
+                                            listener.onScoreChanged(++score);
+                                    }
+                                });
+                                break;
+                            }
+                        }
+
+                        canvas.drawRect(rect, paint);
+                    } else projectiles.remove(projectile);
+                }
 
                 if (isPlaying) {
                     for (Asteroid asteroid : asteroids) {
@@ -199,6 +230,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
         shipRotation = 0;
         asteroidLength = 3000;
         asteroids.clear();
+        projectiles.clear();
 
         if (animator != null && animator.isStarted())
             animator.cancel();
@@ -265,6 +297,11 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
     public boolean onTouch(View v, MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                if (System.currentTimeMillis() - projectileTime < 350) {
+                    projectiles.add(new Projectile(shipPositionX, shipBitmap.getHeight() * shipPositionY * 1.5f));
+                    return false;
+                } else projectileTime = System.currentTimeMillis();
+
                 if (animator != null && animator.isStarted())
                     animator.cancel();
 
@@ -328,7 +365,8 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
     public interface GameListener {
         void onCollision();
         void onAsteroidPassed();
-        void onDistanceChanged(int distance);
+
+        void onScoreChanged(int score);
     }
 
     private static class Particle {
@@ -347,6 +385,27 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
 
             float left = x * width;
             return new Rect((int) left, (int) y, (int) left + 1, (int) y + 1);
+        }
+    }
+
+    private static class Projectile {
+
+        float x, y, yDiff = 4, explosion;
+        boolean isExploding;
+
+        private Projectile(float x, float y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        private Rect next(int width, int height) {
+            if (y < height)
+                y += yDiff;
+            else return null;
+
+            float left = x * width;
+            float top = height - y;
+            return new Rect((int) left - 2, (int) top - 2, (int) left + 2, (int) top + 2);
         }
     }
 

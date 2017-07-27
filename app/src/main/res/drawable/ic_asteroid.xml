@@ -22,7 +22,7 @@
         android:strokeLineJoin="miter"
         android:strokeAlpha="1"/>
     <path
-        android:pathData="m2.237,2.271 l1.191,-0.075"
+        android:pathData="m2.237,2.271 l1.036,-0.23"
         android:strokeLineCap="round"
         android:fillType="evenOdd"
         android:strokeColor="#000000"
@@ -40,7 +40,7 @@
         android:strokeLineJoin="miter"
         android:strokeAlpha="1"/>
     <path
-        android:pathData="m5.963,3.241 l-1.538,0.025 -0.477,-0.945"
+        android:pathData="m5.963,3.241 l-1.538,0.025 -0.322,-0.687"
         android:strokeLineCap="round"
         android:fillType="evenOdd"
         android:strokeColor="#000000"

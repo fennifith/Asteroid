@@ -8,19 +8,17 @@ import android.graphics.Paint;
 import android.graphics.Shader;
 import android.graphics.Typeface;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.TextViewCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.TextView;
 
+import james.asteroid.R;
 import james.asteroid.utils.FontUtils;
 import james.asteroid.views.GameView;
-import james.asteroid.R;
 
 public class MainActivity extends AppCompatActivity implements GameView.GameListener, View.OnClickListener {
 
@@ -87,11 +85,8 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
     }
 
     private void animateTitle(final boolean isVisible) {
-        if (isVisible == titleView.getText().length() > 0)
-            return;
-
         animator = ValueAnimator.ofFloat(isVisible ? 0 : 1, isVisible ? 1 : 0);
-        animator.setDuration(2000);
+        animator.setDuration(1500);
         animator.setStartDelay(500);
         animator.setInterpolator(new AccelerateInterpolator());
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -164,8 +159,8 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
     }
 
     @Override
-    public void onDistanceChanged(int distance) {
-
+    public void onScoreChanged(int score) {
+        titleView.setText(String.valueOf(score));
     }
 
     @Override
