@@ -226,6 +226,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
 
     public void play() {
         isPlaying = true;
+        score = 0;
         shipPositionX = 0.5f;
         shipRotation = 0;
         asteroidLength = 3000;
