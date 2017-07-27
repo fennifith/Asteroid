@@ -5,20 +5,12 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.graphics.Shader;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.DrawableRes;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -31,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import james.asteroid.R;
+import james.asteroid.utils.ImageUtils;
 
 public class GameView extends SurfaceView implements Runnable, View.OnTouchListener {
 
@@ -82,41 +75,14 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
 
         projectiles = new ArrayList<>();
 
-        shipBitmap = tintBitmap(getBitmap(R.drawable.ic_ship));
+        int colorPrimary = ContextCompat.getColor(getContext(), R.color.colorPrimary);
+        int colorAccent = ContextCompat.getColor(getContext(), R.color.colorAccent);
 
-        asteroidBitmap = tintBitmap(getBitmap(R.drawable.ic_asteroid));
-        asteroidBitmap2 = tintBitmap(getBitmap(R.drawable.ic_asteroid_two));
+        shipBitmap = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(getContext(), R.drawable.ic_ship), colorAccent, colorPrimary);
+
+        asteroidBitmap = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(getContext(), R.drawable.ic_asteroid), colorAccent, colorPrimary);
+        asteroidBitmap2 = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(getContext(), R.drawable.ic_asteroid_two), colorAccent, colorPrimary);
         asteroids = new ArrayList<>();
-    }
-
-    private Bitmap getBitmap(@DrawableRes int id) {
-        Drawable drawable = ContextCompat.getDrawable(getContext(), id);
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
-            drawable = (DrawableCompat.wrap(drawable)).mutate();
-
-        Bitmap result = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(result);
-        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        drawable.draw(canvas);
-
-        return result;
-    }
-
-    private Bitmap tintBitmap(Bitmap src) {
-        int width = src.getWidth();
-        int height = src.getHeight();
-        Bitmap result = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(result);
-
-        canvas.drawBitmap(src, 0, 0, null);
-
-        Paint paint = new Paint();
-        LinearGradient shader = new LinearGradient(0,0,0, height, ContextCompat.getColor(getContext(), R.color.colorAccent), ContextCompat.getColor(getContext(), R.color.colorPrimary), Shader.TileMode.CLAMP);
-        paint.setShader(shader);
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-        canvas.drawRect(0,0, width, height, paint);
-
-        return result;
     }
 
     public void setListener(GameListener listener) {
@@ -300,6 +266,8 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
             case MotionEvent.ACTION_DOWN:
                 if (System.currentTimeMillis() - projectileTime < 350) {
                     projectiles.add(new Projectile(shipPositionX, shipBitmap.getHeight() * shipPositionY * 1.5f));
+                    if (listener != null)
+                        listener.onProjectileFired();
                     return false;
                 } else projectileTime = System.currentTimeMillis();
 
@@ -367,6 +335,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
         void onCollision();
         void onAsteroidPassed();
 
+        void onProjectileFired();
         void onScoreChanged(int score);
     }
 
