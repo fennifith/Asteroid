@@ -53,7 +53,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
     private GameListener listener;
     private boolean isPlaying;
     private int score;
-    private float speed;
+    private float speed = 1;
 
     public GameView(Context context) {
         this(context, null);
@@ -122,7 +122,8 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                         canvas.drawBitmap(asteroid.asteroidBitmap, matrix, paint);
                     } else {
                         asteroids.remove(asteroid);
-                        asteroidLength -= (asteroidLength * 0.1);
+                        if (asteroidLength > 750)
+                            asteroidLength -= (asteroidLength * 0.1);
                         new Handler(Looper.getMainLooper()).post(new Runnable() {
                             @Override
                             public void run() {
@@ -217,7 +218,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
         if (animator != null && animator.isStarted())
             animator.cancel();
 
-        ValueAnimator animator = ValueAnimator.ofFloat(shipPositionY, 1f);
+        ValueAnimator animator = ValueAnimator.ofFloat(shipPositionY, 1);
         animator.setInterpolator(new DecelerateInterpolator());
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -248,6 +249,16 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
             }
         });
         animator.start();
+
+        ValueAnimator animator1 = ValueAnimator.ofFloat(speed, 1);
+        animator1.setInterpolator(new DecelerateInterpolator());
+        animator1.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                speed = (float) valueAnimator.getAnimatedValue();
+            }
+        });
+        animator1.start();
     }
 
     public boolean isPlaying() {
@@ -290,15 +301,13 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                     animator.cancel();
 
                 if (event.getX() > getWidth() / 2) {
-                    if (shipPositionX < 1) {
+                    if (shipPositionX < 1)
                         animator = ValueAnimator.ofFloat(shipPositionX, shipPositionX + 1);
-                        animator.setDuration(2000);
-                    } else return false;
-                } else if (shipPositionX > 0) {
+                    else return false;
+                } else if (shipPositionX > 0)
                     animator = ValueAnimator.ofFloat(shipPositionX, shipPositionX - 1);
-                    animator.setDuration(2000);
-                }
 
+                animator.setDuration((long) (2000 / speed));
                 animator.setInterpolator(new AccelerateInterpolator());
                 animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                     @Override
@@ -327,7 +336,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
 
                 animator = ValueAnimator.ofFloat(shipPositionX, newX);
                 animator.setInterpolator(new DecelerateInterpolator());
-                animator.setDuration(1000);
+                animator.setDuration((long) (1000 / speed));
                 animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                     @Override
                     public void onAnimationUpdate(ValueAnimator valueAnimator) {
@@ -354,7 +363,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
         void onScoreChanged(int score);
     }
 
-    private static class Particle {
+    private class Particle {
 
         float x, y, xDiff, yDiff;
         boolean isAccent;
@@ -367,15 +376,15 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
         private Particle(float x, float y) {
             this.x = x;
             this.y = y;
-            xDiff = ((float) (Math.random() + 0.2) - 0.5f) * 0.004f;
-            yDiff = ((float) (Math.random() + 0.2) - 0.5f) * 4;
+            xDiff = ((float) (Math.random() + 0.2) - 0.5f) * 0.016f;
+            yDiff = ((float) (Math.random() + 0.2) - 0.5f) * 16;
             isAccent = true;
         }
 
         private Rect next(int width, int height) {
             if (y >= 0 && y <= height && x >= 0 && x <= width) {
-                y += yDiff;
-                x += xDiff;
+                y += yDiff * speed;
+                x += xDiff * speed;
             } else return null;
 
             float left = x * width;
@@ -383,7 +392,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
         }
     }
 
-    private static class Projectile {
+    private class Projectile {
 
         float x, y, yDiff = 4;
 
@@ -394,7 +403,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
 
         private Rect next(int width, int height) {
             if (y < height)
-                y += yDiff;
+                y += yDiff * speed;
             else return null;
 
             float left = x * width;
@@ -403,7 +412,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
         }
     }
 
-    private static class Asteroid {
+    private class Asteroid {
 
         Bitmap asteroidBitmap;
         float x, xDiff, y, yDiff, rotation, rotationDiff;
@@ -420,9 +429,9 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
 
         private Matrix next(int width, int height) {
             if ((y - asteroidBitmap.getHeight()) < height) {
-                y += yDiff;
+                y += yDiff * speed;
                 rotation += rotationDiff;
-                x += xDiff;
+                x += xDiff * speed;
             } else return null;
 
             float left = x * width, top = y;
