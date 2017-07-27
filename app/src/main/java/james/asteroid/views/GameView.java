@@ -28,6 +28,7 @@ import james.asteroid.utils.ImageUtils;
 public class GameView extends SurfaceView implements Runnable, View.OnTouchListener {
 
     private Paint paint;
+    private Paint accentPaint;
     private SurfaceHolder surfaceHolder;
     private boolean isRunning;
     private Thread thread;
@@ -52,6 +53,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
     private GameListener listener;
     private boolean isPlaying;
     private int score;
+    private float speed;
 
     public GameView(Context context) {
         this(context, null);
@@ -65,18 +67,24 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
         super(context, attrs, defStyleAttr);
         surfaceHolder = getHolder();
 
+        int colorPrimaryLight = ContextCompat.getColor(getContext(), R.color.colorPrimaryLight);
+        int colorPrimary = ContextCompat.getColor(getContext(), R.color.colorPrimary);
+        int colorAccent = ContextCompat.getColor(getContext(), R.color.colorAccent);
+
         paint = new Paint();
         paint.setColor(Color.WHITE);
         paint.setStyle(Paint.Style.FILL);
         paint.setAntiAlias(true);
 
+        accentPaint = new Paint();
+        accentPaint.setColor(colorPrimaryLight);
+        accentPaint.setStyle(Paint.Style.FILL);
+        accentPaint.setAntiAlias(true);
+
         particles = new ArrayList<>();
         particles.add(new Particle());
 
         projectiles = new ArrayList<>();
-
-        int colorPrimary = ContextCompat.getColor(getContext(), R.color.colorPrimary);
-        int colorAccent = ContextCompat.getColor(getContext(), R.color.colorAccent);
 
         shipBitmap = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(getContext(), R.drawable.ic_ship), colorAccent, colorPrimary);
 
@@ -102,7 +110,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                 for (Particle particle : new ArrayList<>(particles)) {
                     Rect rect = particle.next(canvas.getWidth(), canvas.getHeight());
                     if (rect != null)
-                        canvas.drawRect(rect, paint);
+                        canvas.drawRect(rect, particle.isAccent ? accentPaint : paint);
                     else particles.remove(particle);
                 }
 
@@ -154,6 +162,10 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                                 projectiles.remove(projectile);
                                 asteroids.remove(asteroid);
 
+                                for (int i = 0; i < 50; i++) {
+                                    particles.add(new Particle((float) rect.left / canvas.getWidth(), rect.top));
+                                }
+
                                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                                     @Override
                                     public void run() {
@@ -161,6 +173,8 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                                             listener.onScoreChanged(++score);
                                     }
                                 });
+
+                                speed += (speed - 0.9) * 0.1;
                                 break;
                             }
                         }
@@ -193,6 +207,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
     public void play() {
         isPlaying = true;
         score = 0;
+        speed = 1;
         shipPositionX = 0.5f;
         shipRotation = 0;
         asteroidLength = 3000;
@@ -341,17 +356,27 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
 
     private static class Particle {
 
-        float x, y, yDiff;
+        float x, y, xDiff, yDiff;
+        boolean isAccent;
 
         private Particle() {
             x = (float) Math.random();
             yDiff = (float) (Math.random() * 3) + 1;
         }
 
+        private Particle(float x, float y) {
+            this.x = x;
+            this.y = y;
+            xDiff = ((float) (Math.random() + 0.2) - 0.5f) * 0.004f;
+            yDiff = ((float) (Math.random() + 0.2) - 0.5f) * 4;
+            isAccent = true;
+        }
+
         private Rect next(int width, int height) {
-            if (y < height)
+            if (y >= 0 && y <= height && x >= 0 && x <= width) {
                 y += yDiff;
-            else return null;
+                x += xDiff;
+            } else return null;
 
             float left = x * width;
             return new Rect((int) left, (int) y, (int) left + 1, (int) y + 1);
@@ -360,8 +385,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
 
     private static class Projectile {
 
-        float x, y, yDiff = 4, explosion;
-        boolean isExploding;
+        float x, y, yDiff = 4;
 
         private Projectile(float x, float y) {
             this.x = x;
