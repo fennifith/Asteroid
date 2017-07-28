@@ -1,4 +1,20 @@
 <resources>
     <string name="app_name">Asteroid</string>
     <string name="hint_start">Press to Start</string>
+    <string name="score_high">High Score: %d</string>
+
+    <string name="weapon_pellet">Pellet Gun</string>
+    <string name="weapon_watermelon">Watermelon Cannon</string>
+    <string name="weapon_grape">Grape Shooter</string>
+    <string name="weapon_watermelons">Watermelon Sprayer</string>
+    <string name="weapon_pellets">Pellet Sprayer</string>
+    <string name="weapon_laser">Laser</string>
+    <string name="weapon_seed">Grape Seed Sprayer</string>
+    <string name="weapon_brick">Brick Thrower</string>
+    <string name="weapon_lasers">Laser Sprayer</string>
+    <string name="weapon_particle">Particle Cannon</string>
+    <string name="weapon_particles">Particle Cannons</string>
+    <string name="weapon_particless">More Particle Cannons</string>
+    <string name="weapon">Weapon: %s</string>
+
 </resources>
