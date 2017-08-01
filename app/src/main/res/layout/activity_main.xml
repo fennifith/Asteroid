@@ -88,39 +88,6 @@
         android:textColor="@color/colorAccent"
         android:textSize="18sp" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_alignParentBottom="true"
-        android:orientation="horizontal">
-
-        <ImageView
-            android:id="@+id/previousWeapon"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:scaleType="centerInside"
-            app:srcCompat="@drawable/ic_previous" />
-
-        <TextView
-            android:id="@+id/weapon"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:textAlignment="center"
-            android:textColor="@color/colorAccent"
-            android:textSize="18sp" />
-
-        <ImageView
-            android:id="@+id/nextWeapon"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:scaleType="centerInside"
-            app:srcCompat="@drawable/ic_next" />
-
-    </LinearLayout>
-
     <TextView
         android:id="@+id/title"
         android:layout_width="match_parent"

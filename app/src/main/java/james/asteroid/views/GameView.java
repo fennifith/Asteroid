@@ -18,7 +18,6 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +28,7 @@ import james.asteroid.data.BoxData;
 import james.asteroid.data.ParticleData;
 import james.asteroid.data.ProjectileData;
 import james.asteroid.data.WeaponData;
+import james.asteroid.utils.FontUtils;
 import james.asteroid.utils.ImageUtils;
 
 public class GameView extends SurfaceView implements Runnable, View.OnTouchListener {
@@ -64,6 +64,9 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
     private boolean isPlaying;
     private int score;
     private float speed = 1;
+    private int distance;
+    private float ammo;
+    private ValueAnimator ammoAnimator;
 
     public GameView(Context context) {
         this(context, null);
@@ -157,6 +160,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                 if (isPlaying() && System.currentTimeMillis() - asteroidTime > asteroidLength) {
                     asteroidTime = System.currentTimeMillis();
                     asteroids.add(new AsteroidData(Math.round(Math.random()) == 0 ? asteroidBitmap : asteroidBitmap2));
+                    distance++;
                 }
 
                 float left = canvas.getWidth() * shipPositionX;
@@ -195,14 +199,31 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
 
                                         if (score % 20 == 0 && (score / 20) < (WeaponData.WEAPONS.length - 1)) {
                                             final WeaponData weapon = WeaponData.WEAPONS[score / 20];
-                                            if (!weapon.isEnabled(getContext()))
-                                                boxes.add(new BoxData(boxBitmap, new BoxData.BoxOpenedListener() {
-                                                    @Override
-                                                    public void onBoxOpened() {
-                                                        weapon.setEnabled(getContext());
-                                                        Toast.makeText(getContext(), "New Weapon Unlocked: " + weapon.getName(getContext()), Toast.LENGTH_SHORT).show();
-                                                    }
-                                                }));
+                                            boxes.add(new BoxData(weapon.getBitmap(getContext()), new BoxData.BoxOpenedListener() {
+                                                @Override
+                                                public void onBoxOpened() {
+                                                    GameView.this.weapon = weapon;
+                                                    FontUtils.toast(getContext(), "Weapon Equipped: " + weapon.getName(getContext()));
+                                                }
+                                            }));
+                                        }
+
+                                        if (score % 5 == 0) {
+                                            boxes.add(new BoxData(boxBitmap, new BoxData.BoxOpenedListener() {
+                                                @Override
+                                                public void onBoxOpened() {
+                                                    ammoAnimator = ValueAnimator.ofFloat(ammo, Math.min(ammo + 5, weapon.capacity));
+                                                    ammoAnimator.setDuration(500);
+                                                    ammoAnimator.setInterpolator(new DecelerateInterpolator());
+                                                    ammoAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                                                        @Override
+                                                        public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                                                            ammo = (float) valueAnimator.getAnimatedValue();
+                                                        }
+                                                    });
+                                                    ammoAnimator.start();
+                                                }
+                                            }));
                                         }
                                     }
                                 });
@@ -217,6 +238,11 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                 }
 
                 if (isPlaying) {
+                    accentPaint.setAlpha(100);
+                    canvas.drawRect(0, (float) canvas.getHeight() - 5, (float) canvas.getWidth(), (float) canvas.getHeight(), accentPaint);
+                    accentPaint.setAlpha(255);
+                    canvas.drawRect(0, (float) canvas.getHeight() - 5, canvas.getWidth() * (ammo / weapon.capacity), (float) canvas.getHeight(), accentPaint);
+
                     for (AsteroidData asteroid : asteroids) {
                         if (asteroid.position != null && position.intersect(asteroid.position)) {
                             new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -253,6 +279,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
         isPlaying = true;
         score = 0;
         speed = 1;
+        ammo = 15;
         shipPositionX = 0.5f;
         shipRotation = 0;
         asteroidLength = 3000;
@@ -273,7 +300,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
         });
         animator.start();
 
-        weapon = WeaponData.getEquippedWeapon(getContext());
+        weapon = WeaponData.WEAPONS[0];
         setOnTouchListener(this);
     }
 
@@ -337,9 +364,24 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 if (System.currentTimeMillis() - projectileTime < 350) {
-                    weapon.fire(projectiles, shipPositionX, shipBitmap.getHeight() * shipPositionY * 1.5f);
-                    if (listener != null)
-                        listener.onProjectileFired(weapon);
+                    if (ammoAnimator != null && ammoAnimator.isStarted())
+                        ammoAnimator.end();
+                    if (ammo > 0) {
+                        weapon.fire(projectiles, shipPositionX, shipBitmap.getHeight() * shipPositionY * 1.5f);
+                        if (listener != null)
+                            listener.onProjectileFired(weapon);
+
+                        ammoAnimator = ValueAnimator.ofFloat(ammo, ammo - 1);
+                        ammoAnimator.setDuration(500);
+                        ammoAnimator.setInterpolator(new DecelerateInterpolator());
+                        ammoAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                            @Override
+                            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                                ammo = (float) valueAnimator.getAnimatedValue();
+                            }
+                        });
+                        ammoAnimator.start();
+                    } else FontUtils.toast(getContext(), "Out of ammo :(");
                     return false;
                 } else projectileTime = System.currentTimeMillis();
 

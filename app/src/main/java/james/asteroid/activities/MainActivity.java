@@ -39,9 +39,6 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
     private ImageView soundView;
     private ImageView achievementsView;
     private ImageView rankView;
-    private ImageView nextWeapon;
-    private ImageView previousWeapon;
-    private TextView weaponView;
     private LinearLayout buttonLayout;
     private ImageView pauseView;
     private ImageView stopView;
@@ -93,9 +90,9 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
             }
 
             if (isPaused) {
-                if (pauseView.getVisibility() == View.VISIBLE)
-                    pauseView.setVisibility(View.INVISIBLE);
-                else pauseView.setVisibility(View.VISIBLE);
+                if (pauseView.getAlpha() == 1)
+                    pauseView.setAlpha(0.5f);
+                else pauseView.setAlpha(1f);
             }
 
             handler.postDelayed(this, 1000);
@@ -112,9 +109,6 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
         titleView = findViewById(R.id.title);
         highScoreView = findViewById(R.id.highScore);
         hintView = findViewById(R.id.hint);
-        nextWeapon = findViewById(R.id.nextWeapon);
-        previousWeapon = findViewById(R.id.previousWeapon);
-        weaponView = findViewById(R.id.weapon);
         buttonLayout = findViewById(R.id.buttonLayout);
         musicView = findViewById(R.id.music);
         soundView = findViewById(R.id.sound);
@@ -156,17 +150,6 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
 
         highScoreView.setTypeface(typeface);
         highScoreView.getPaint().setShader(new LinearGradient(
-                0, 0, 0,
-                hintView.getLineHeight(),
-                colorAccent,
-                colorPrimary,
-                Shader.TileMode.REPEAT
-        ));
-
-        weapon = String.format(getString(R.string.weapon), WeaponData.getEquippedWeapon(this).getName(this));
-        weaponView.setText(weapon);
-        weaponView.setTypeface(typeface);
-        weaponView.getPaint().setShader(new LinearGradient(
                 0, 0, 0,
                 hintView.getLineHeight(),
                 colorAccent,
@@ -259,6 +242,7 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
                     gameView.onPause();
                 } else {
                     pauseView.setImageBitmap(pause);
+                    pauseView.setAlpha(1f);
                     stopView.setVisibility(View.GONE);
                     gameView.onResume();
                 }
@@ -271,50 +255,13 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
             public void onClick(View view) {
                 if (isPaused) {
                     pauseView.setImageBitmap(pause);
+                    pauseView.setAlpha(1f);
                     gameView.onResume();
                     isPaused = false;
                 }
 
                 gameView.stop();
                 onStop(0);
-            }
-        });
-
-        nextWeapon.setImageBitmap(ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(this, R.drawable.ic_next), colorAccent, colorPrimary));
-        nextWeapon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                for (int i = 0; i < WeaponData.WEAPONS.length - 1; i++) {
-                    if (WeaponData.WEAPONS[i].isEquipped(MainActivity.this)) {
-                        WeaponData.WEAPONS[++i].setEquipped(MainActivity.this);
-                        break;
-                    }
-                }
-
-                weapon = String.format(getString(R.string.weapon), WeaponData.getEquippedWeapon(MainActivity.this).getName(MainActivity.this));
-                weaponView.setText(weapon);
-
-                if (isSound)
-                    soundPool.play(buttonId, 1, 1, 0, 0, 1);
-            }
-        });
-
-        previousWeapon.setImageBitmap(ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(this, R.drawable.ic_previous), colorAccent, colorPrimary));
-        previousWeapon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                for (int i = 1; i < WeaponData.WEAPONS.length; i++) {
-                    if (WeaponData.WEAPONS[i].isEquipped(MainActivity.this)) {
-                        WeaponData.WEAPONS[--i].setEquipped(MainActivity.this);
-                        break;
-                    }
-                }
-
-                weapon = String.format(getString(R.string.weapon), WeaponData.getEquippedWeapon(MainActivity.this).getName(MainActivity.this));
-                weaponView.setText(weapon);
-
-                if (isSound)
-                    soundPool.play(buttonId, 1, 1, 0, 0, 1);
             }
         });
 
@@ -342,20 +289,15 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 titleView.setText(appName.substring(0, (int) ((float) valueAnimator.getAnimatedValue() * appName.length())));
                 hintView.setText(hintStart.substring(0, (int) ((float) valueAnimator.getAnimatedValue() * hintStart.length())));
-                weaponView.setText(weapon.substring(0, (int) ((float) valueAnimator.getAnimatedValue() * weapon.length())));
             }
         });
         animator.start();
 
         if (isVisible) {
-            nextWeapon.setVisibility(View.VISIBLE);
-            previousWeapon.setVisibility(View.VISIBLE);
             buttonLayout.setVisibility(View.VISIBLE);
             pauseView.setVisibility(View.GONE);
             stopView.setVisibility(View.GONE);
         } else {
-            nextWeapon.setVisibility(View.GONE);
-            previousWeapon.setVisibility(View.GONE);
             buttonLayout.setVisibility(View.GONE);
             pauseView.setVisibility(View.VISIBLE);
             stopView.setVisibility(View.GONE);
@@ -366,7 +308,7 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
     public void onPause() {
         if (isMusic)
             player.pause();
-        if (gameView != null)
+        if (gameView != null && !isPaused)
             gameView.onPause();
         super.onPause();
     }
@@ -376,7 +318,7 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
         super.onResume();
         if (isMusic)
             player.start();
-        if (gameView != null)
+        if (gameView != null && !isPaused)
             gameView.onResume();
     }
 

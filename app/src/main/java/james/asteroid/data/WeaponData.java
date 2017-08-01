@@ -1,63 +1,62 @@
 package james.asteroid.data;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.media.SoundPool;
-import android.preference.PreferenceManager;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.RawRes;
+import android.support.annotation.StringRes;
+import android.support.v4.content.ContextCompat;
 
 import java.util.List;
 
 import james.asteroid.R;
-import james.asteroid.utils.PreferenceUtils;
+import james.asteroid.utils.ImageUtils;
 
 public class WeaponData {
 
     public static final WeaponData[] WEAPONS = new WeaponData[]{
-            new WeaponData(R.string.weapon_pellet, R.raw.laser, 1, 1),
-            new WeaponData(R.string.weapon_watermelon, R.raw.laser, 2, 1),
-            new WeaponData(R.string.weapon_grape, R.raw.laser, 1, 3),
-            new WeaponData(R.string.weapon_watermelons, R.raw.laser, 2, 3),
-            new WeaponData(R.string.weapon_pellets, R.raw.laser, 1, 5),
-            new WeaponData(R.string.weapon_laser, R.raw.laser, 3, 5),
-            new WeaponData(R.string.weapon_seed, R.raw.laser, 1, 10),
-            new WeaponData(R.string.weapon_brick, R.raw.laser, 5, 3),
-            new WeaponData(R.string.weapon_lasers, R.raw.laser, 3, 8),
-            new WeaponData(R.string.weapon_particle, R.raw.laser, 10, 1),
-            new WeaponData(R.string.weapon_particles, R.raw.laser, 10, 3),
-            new WeaponData(R.string.weapon_particless, R.raw.laser, 10, 5)
+            new WeaponData(R.string.weapon_pellet, R.drawable.ic_weapon_pellet, R.raw.laser, 1, 1, 15),
+            new WeaponData(R.string.weapon_watermelon, R.drawable.ic_weapon_watermelon, R.raw.laser, 2, 1, 20),
+            new WeaponData(R.string.weapon_grape, R.drawable.ic_weapon_grape, R.raw.laser, 1, 3, 20),
+            new WeaponData(R.string.weapon_watermelons, R.drawable.ic_weapon_watermelon_sprayer, R.raw.laser, 2, 3, 25),
+            new WeaponData(R.string.weapon_pellets, R.drawable.ic_weapon_pellet_sprayer, R.raw.laser, 1, 5, 25),
+            new WeaponData(R.string.weapon_laser, R.drawable.ic_weapon_laser, R.raw.laser, 3, 5, 20),
+            new WeaponData(R.string.weapon_seed, R.drawable.ic_weapon_grape_sprayer, R.raw.laser, 1, 10, 15),
+            new WeaponData(R.string.weapon_brick, R.drawable.ic_weapon_brick, R.raw.laser, 5, 3, 25),
+            new WeaponData(R.string.weapon_lasers, R.drawable.ic_weapon_laser_sprayer, R.raw.laser, 3, 8, 20),
+            new WeaponData(R.string.weapon_particle, R.drawable.ic_weapon_particle, R.raw.laser, 10, 1, 40),
+            new WeaponData(R.string.weapon_particles, R.drawable.ic_weapon_particles, R.raw.laser, 10, 3, 45),
+            new WeaponData(R.string.weapon_particless, R.drawable.ic_weapon_particless, R.raw.laser, 10, 5, 50)
     };
 
     private int nameRes;
+    private int drawableRes;
     private int strength;
     private int spray;
     private int soundRes;
+    public int capacity;
     public int soundId;
+    private Bitmap bitmap;
 
-    public WeaponData(int nameRes, int soundRes, int strength, int spray) {
+    public WeaponData(@StringRes int nameRes, @DrawableRes int drawableRes, @RawRes int soundRes, int strength, int spray, int capacity) {
         this.nameRes = nameRes;
+        this.drawableRes = drawableRes;
         this.soundRes = soundRes;
         this.strength = strength;
         this.spray = spray;
+        this.capacity = capacity;
     }
 
     public String getName(Context context) {
         return context.getString(nameRes);
     }
 
-    public boolean isEquipped(Context context) {
-        return PreferenceManager.getDefaultSharedPreferences(context).getString(PreferenceUtils.PREF_WEAPON, WEAPONS[0].getName(context)).equals(getName(context));
-    }
+    public Bitmap getBitmap(Context context) {
+        if (bitmap == null)
+            bitmap = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(context, drawableRes), ContextCompat.getColor(context, R.color.colorAccent), ContextCompat.getColor(context, R.color.colorPrimary));
 
-    public void setEquipped(Context context) {
-        if (isEnabled(context))
-            PreferenceManager.getDefaultSharedPreferences(context).edit().putString(PreferenceUtils.PREF_WEAPON, getName(context)).apply();
-    }
-
-    public boolean isEnabled(Context context) {
-        return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(PreferenceUtils.PREF_WEAPON_ENABLED + getName(context), equals(WEAPONS[0]));
-    }
-
-    public void setEnabled(Context context) {
-        PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean(PreferenceUtils.PREF_WEAPON_ENABLED + getName(context), true).apply();
+        return bitmap;
     }
 
     public void fire(List<ProjectileData> projectiles, float x, float y) {
@@ -71,15 +70,6 @@ public class WeaponData {
 
     private void loadSoundRes(Context context, SoundPool soundPool) {
         soundId = soundPool.load(context, soundRes, 1);
-    }
-
-    public static WeaponData getEquippedWeapon(Context context) {
-        for (WeaponData weapon : WEAPONS) {
-            if (weapon.isEquipped(context))
-                return weapon;
-        }
-
-        return WEAPONS[0];
     }
 
     public static void loadSounds(Context context, SoundPool soundPool) {

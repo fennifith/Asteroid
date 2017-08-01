@@ -1,0 +1,55 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="42dp"
+    android:height="42dp"
+    android:viewportWidth="6.35"
+    android:viewportHeight="6.35">
+    <path
+        android:pathData="m4.592,2.729l0,0.157 0,0.733l1.385,0l0,-0.89zM4.879,3.044L5.688,3.044l0,0.263L4.879,3.307Z"
+        android:strokeLineCap="round"
+        android:fillAlpha="1"
+        android:fillType="nonZero"
+        android:strokeColor="#00000000"
+        android:fillColor="#000000"
+        android:strokeWidth="0.24822544"
+        android:strokeLineJoin="miter"
+        android:strokeAlpha="1" />
+    <path
+        android:pathData="m3.601,2.842l0,0.312l1.135,0l0,-0.312z"
+        android:strokeLineCap="butt"
+        android:fillAlpha="1"
+        android:fillType="evenOdd"
+        android:strokeColor="#00000000"
+        android:fillColor="#000000"
+        android:strokeWidth="0.24822544"
+        android:strokeLineJoin="miter"
+        android:strokeAlpha="1" />
+    <path
+        android:pathData="m3.601,3.196l0,0.312l1.135,0l0,-0.312z"
+        android:strokeLineCap="butt"
+        android:fillAlpha="1"
+        android:fillType="evenOdd"
+        android:strokeColor="#00000000"
+        android:fillColor="#000000"
+        android:strokeWidth="0.24822544"
+        android:strokeLineJoin="miter"
+        android:strokeAlpha="1" />
+    <path
+        android:pathData="M2.14,2.796l1.462,0l0,0.758l-1.462,0z"
+        android:strokeLineCap="round"
+        android:fillAlpha="1"
+        android:fillType="nonZero"
+        android:strokeColor="#000000"
+        android:fillColor="#00000000"
+        android:strokeWidth="0.24822545"
+        android:strokeLineJoin="miter"
+        android:strokeAlpha="1" />
+    <path
+        android:pathData="m2.14,3.004l-1.468,0l0,1.428l2.422,0l0,-0.877"
+        android:strokeLineCap="butt"
+        android:fillType="evenOdd"
+        android:strokeColor="#000000"
+        android:fillColor="#00000000"
+        android:strokeWidth="0.21892105"
+        android:strokeLineJoin="miter"
+        android:strokeAlpha="1" />
+</vector>
