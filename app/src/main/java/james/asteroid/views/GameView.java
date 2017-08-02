@@ -203,7 +203,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                                                 @Override
                                                 public void onBoxOpened() {
                                                     GameView.this.weapon = weapon;
-                                                    if (weapon.capacity > ammo)
+                                                    if (weapon.capacity < ammo)
                                                         ammo = weapon.capacity;
                                                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                                                         @Override
