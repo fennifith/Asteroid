@@ -16,18 +16,18 @@ import james.asteroid.utils.ImageUtils;
 public class WeaponData {
 
     public static final WeaponData[] WEAPONS = new WeaponData[]{
-            new WeaponData(R.string.weapon_pellet, R.drawable.ic_weapon_pellet, R.raw.laser, 1, 1, 15),
-            new WeaponData(R.string.weapon_watermelon, R.drawable.ic_weapon_watermelon, R.raw.laser, 2, 1, 20),
-            new WeaponData(R.string.weapon_grape, R.drawable.ic_weapon_grape, R.raw.laser, 1, 3, 20),
-            new WeaponData(R.string.weapon_watermelons, R.drawable.ic_weapon_watermelon_sprayer, R.raw.laser, 2, 3, 25),
-            new WeaponData(R.string.weapon_pellets, R.drawable.ic_weapon_pellet_sprayer, R.raw.laser, 1, 5, 25),
+            new WeaponData(R.string.weapon_pellet, R.drawable.ic_weapon_pellet, R.raw.pellet, 1, 1, 15),
+            new WeaponData(R.string.weapon_watermelon, R.drawable.ic_weapon_watermelon, R.raw.watermelon, 2, 1, 20),
+            new WeaponData(R.string.weapon_grape, R.drawable.ic_weapon_grape, R.raw.grape, 1, 3, 20),
+            new WeaponData(R.string.weapon_watermelons, R.drawable.ic_weapon_watermelon_sprayer, R.raw.watermelon, 2, 3, 25),
+            new WeaponData(R.string.weapon_pellets, R.drawable.ic_weapon_pellet_sprayer, R.raw.pellet, 1, 5, 25),
             new WeaponData(R.string.weapon_laser, R.drawable.ic_weapon_laser, R.raw.laser, 3, 5, 20),
-            new WeaponData(R.string.weapon_seed, R.drawable.ic_weapon_grape_sprayer, R.raw.laser, 1, 10, 15),
-            new WeaponData(R.string.weapon_brick, R.drawable.ic_weapon_brick, R.raw.laser, 5, 3, 25),
+            new WeaponData(R.string.weapon_seed, R.drawable.ic_weapon_grape_sprayer, R.raw.grape, 1, 10, 15),
+            new WeaponData(R.string.weapon_brick, R.drawable.ic_weapon_brick, R.raw.brick, 5, 3, 25),
             new WeaponData(R.string.weapon_lasers, R.drawable.ic_weapon_laser_sprayer, R.raw.laser, 3, 8, 20),
-            new WeaponData(R.string.weapon_particle, R.drawable.ic_weapon_particle, R.raw.laser, 10, 1, 40),
-            new WeaponData(R.string.weapon_particles, R.drawable.ic_weapon_particles, R.raw.laser, 10, 3, 45),
-            new WeaponData(R.string.weapon_particless, R.drawable.ic_weapon_particless, R.raw.laser, 10, 5, 50)
+            new WeaponData(R.string.weapon_particle, R.drawable.ic_weapon_particle, R.raw.particle, 10, 1, 40),
+            new WeaponData(R.string.weapon_particles, R.drawable.ic_weapon_particles, R.raw.particle, 10, 3, 45),
+            new WeaponData(R.string.weapon_particless, R.drawable.ic_weapon_particless, R.raw.particle, 10, 5, 50)
     };
 
     private int nameRes;
