@@ -1,5 +1,7 @@
 package james.asteroid.views;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -28,6 +30,7 @@ import james.asteroid.data.BoxData;
 import james.asteroid.data.ParticleData;
 import james.asteroid.data.ProjectileData;
 import james.asteroid.data.WeaponData;
+import james.asteroid.utils.FontUtils;
 import james.asteroid.utils.ImageUtils;
 
 public class GameView extends SurfaceView implements Runnable, View.OnTouchListener {
@@ -66,6 +69,12 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
     private int distance;
     private float ammo;
     private ValueAnimator ammoAnimator;
+
+    private boolean isTutorial;
+    private boolean isMoved;
+    private boolean isUpgraded;
+    private boolean isAsteroid;
+    private boolean isReplenished;
 
     public GameView(Context context) {
         this(context, null);
@@ -135,13 +144,34 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                     Matrix matrix = box.next(speed, canvas.getWidth(), canvas.getHeight());
                     if (matrix != null)
                         canvas.drawBitmap(box.boxBitmap, matrix, paint);
-                    else boxes.remove(box);
+                    else if (isTutorial) {
+                        boxes.remove(box);
+                        boxes.add(new BoxData(box.boxBitmap, box.listener));
+                        new Handler(Looper.getMainLooper()).post(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (!isUpgraded)
+                                    FontUtils.toast(getContext(), "Move your ship near the weapon to pick it up.");
+                                else
+                                    FontUtils.toast(getContext(), "Move your ship near the ammunition box to pick it up.");
+                            }
+                        });
+                    } else boxes.remove(box);
                 }
 
                 for (AsteroidData asteroid : new ArrayList<>(asteroids)) {
                     Matrix matrix = asteroid.next(speed, canvas.getWidth(), canvas.getHeight());
                     if (matrix != null) {
                         canvas.drawBitmap(asteroid.asteroidBitmap, matrix, paint);
+                    } else if (isTutorial && !isAsteroid) {
+                        asteroids.remove(asteroid);
+                        asteroids.add(new AsteroidData(asteroidBitmap));
+                        new Handler(Looper.getMainLooper()).post(new Runnable() {
+                            @Override
+                            public void run() {
+                                FontUtils.toast(getContext(), "Destroy the asteroid to gain a point.");
+                            }
+                        });
                     } else {
                         asteroids.remove(asteroid);
                         if (asteroidLength > 750)
@@ -156,7 +186,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                     }
                 }
 
-                if (isPlaying() && System.currentTimeMillis() - asteroidTime > asteroidLength) {
+                if (isPlaying && !isTutorial && System.currentTimeMillis() - asteroidTime > asteroidLength) {
                     asteroidTime = System.currentTimeMillis();
                     asteroids.add(new AsteroidData(Math.round(Math.random()) == 0 ? asteroidBitmap : asteroidBitmap2));
                     distance++;
@@ -190,6 +220,9 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                                     particles.add(new ParticleData((float) rect.left / canvas.getWidth(), rect.top));
                                 }
 
+                                if (isTutorial)
+                                    isAsteroid = true;
+
                                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                                     @Override
                                     public void run() {
@@ -200,7 +233,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                                             final WeaponData weapon = WeaponData.WEAPONS[score / 20];
                                             boxes.add(new BoxData(weapon.getBitmap(getContext()), new BoxData.BoxOpenedListener() {
                                                 @Override
-                                                public void onBoxOpened() {
+                                                public void onBoxOpened(BoxData box) {
                                                     GameView.this.weapon = weapon;
                                                     if (weapon.capacity < ammo)
                                                         ammo = weapon.capacity;
@@ -218,21 +251,21 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                                         if (score % 5 == 0) {
                                             boxes.add(new BoxData(boxBitmap, new BoxData.BoxOpenedListener() {
                                                 @Override
-                                                public void onBoxOpened() {
-                                                    ammoAnimator = ValueAnimator.ofFloat(ammo, Math.min(ammo + 5, weapon.capacity));
-                                                    ammoAnimator.setDuration(500);
-                                                    ammoAnimator.setInterpolator(new DecelerateInterpolator());
-                                                    ammoAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                                                        @Override
-                                                        public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                                                            ammo = (float) valueAnimator.getAnimatedValue();
-                                                        }
-                                                    });
-                                                    ammoAnimator.start();
-
+                                                public void onBoxOpened(BoxData box) {
                                                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                                                         @Override
                                                         public void run() {
+                                                            ammoAnimator = ValueAnimator.ofFloat(ammo, Math.min(ammo + 5, weapon.capacity));
+                                                            ammoAnimator.setDuration(500);
+                                                            ammoAnimator.setInterpolator(new DecelerateInterpolator());
+                                                            ammoAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                                                                @Override
+                                                                public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                                                                    ammo = (float) valueAnimator.getAnimatedValue();
+                                                                }
+                                                            });
+                                                            ammoAnimator.start();
+
                                                             if (listener != null)
                                                                 listener.onAmmoReplenished();
                                                         }
@@ -253,20 +286,26 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                 }
 
                 if (isPlaying) {
-                    accentPaint.setAlpha(100);
-                    canvas.drawRect(0, (float) canvas.getHeight() - 5, (float) canvas.getWidth(), (float) canvas.getHeight(), accentPaint);
-                    accentPaint.setAlpha(255);
-                    canvas.drawRect(0, (float) canvas.getHeight() - 5, canvas.getWidth() * (ammo / weapon.capacity), (float) canvas.getHeight(), accentPaint);
+                    if (!isTutorial || isUpgraded) {
+                        accentPaint.setAlpha(100);
+                        canvas.drawRect(0, (float) canvas.getHeight() - 5, (float) canvas.getWidth(), (float) canvas.getHeight(), accentPaint);
+                        accentPaint.setAlpha(255);
+                        canvas.drawRect(0, (float) canvas.getHeight() - 5, canvas.getWidth() * (ammo / weapon.capacity), (float) canvas.getHeight(), accentPaint);
+                    }
 
                     for (AsteroidData asteroid : asteroids) {
                         if (asteroid.position != null && position.intersect(asteroid.position)) {
                             new Handler(Looper.getMainLooper()).post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    if (listener != null)
-                                        listener.onStop(score);
+                                    if (listener != null) {
+                                        listener.onAsteroidHit();
+                                        if (!isTutorial)
+                                            listener.onStop(score);
+                                    }
 
-                                    stop();
+                                    if (!isTutorial)
+                                        stop();
                                 }
                             });
                         }
@@ -274,15 +313,93 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
 
                     for (final BoxData box : new ArrayList<>(boxes)) {
                         if (box.position != null && position.intersect(box.position)) {
-                            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    box.open();
-                                }
-                            });
+                            box.open();
                             boxes.remove(box);
                         }
                     }
+                }
+
+                if (isTutorial && isMoved && !isUpgraded && boxes.size() == 0) {
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            FontUtils.toast(getContext(), "This is a weapon. Move your ship near it to pick it up.");
+                        }
+                    });
+
+                    boxes.add(new BoxData(WeaponData.WEAPONS[0].getBitmap(getContext()), new BoxData.BoxOpenedListener() {
+                        @Override
+                        public void onBoxOpened(BoxData box) {
+                            weapon = WeaponData.WEAPONS[0];
+                            isUpgraded = true;
+
+                            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (listener != null)
+                                        listener.onWeaponUpgraded(weapon);
+                                }
+                            });
+                        }
+                    }));
+                }
+
+                if (isTutorial && isUpgraded && !isAsteroid && asteroids.size() == 0) {
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            FontUtils.toast(getContext(), "Double tap to fire. Destroy the asteroid to gain a point.");
+                        }
+                    });
+
+                    asteroids.add(new AsteroidData(asteroidBitmap));
+                }
+
+                if (isTutorial && isAsteroid && !isReplenished && boxes.size() == 0) {
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            FontUtils.toast(getContext(), "Looks like you\'re a little low on ammo. Here\'s a refill.");
+                            FontUtils.toast(getContext(), "You normally get them after you destroy 5 asteroids.");
+                        }
+                    });
+
+                    boxes.add(new BoxData(boxBitmap, new BoxData.BoxOpenedListener() {
+                        @Override
+                        public void onBoxOpened(BoxData box) {
+                            isReplenished = true;
+
+                            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    ammoAnimator = ValueAnimator.ofFloat(ammo, weapon.capacity);
+                                    ammoAnimator.setDuration(500);
+                                    ammoAnimator.setInterpolator(new DecelerateInterpolator());
+                                    ammoAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                                        @Override
+                                        public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                                            ammo = (float) valueAnimator.getAnimatedValue();
+                                        }
+                                    });
+                                    ammoAnimator.start();
+
+                                    if (listener != null)
+                                        listener.onAmmoReplenished();
+                                }
+                            });
+                        }
+                    }));
+                }
+
+                if (isTutorial && isReplenished) {
+                    isTutorial = false;
+
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            FontUtils.toast(getContext(), "That\'s it for now! Come back anytime by using the info button on the main menu.");
+                        }
+                    });
                 }
 
                 surfaceHolder.unlockCanvasAndPost(canvas);
@@ -315,8 +432,19 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
         });
         animator.start();
 
-        weapon = WeaponData.WEAPONS[0];
+        if (!isTutorial)
+            weapon = WeaponData.WEAPONS[0];
         setOnTouchListener(this);
+    }
+
+    public void playTutorial() {
+        isTutorial = true;
+        isMoved = false;
+        isUpgraded = false;
+        isAsteroid = false;
+        isReplenished = false;
+        play();
+        FontUtils.toast(getContext(), "Press anywhere on the left or right halves of the screen to move your ship.");
     }
 
     public void stop() {
@@ -336,6 +464,15 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                 shipRotation = 720 * valueAnimator.getAnimatedFraction();
             }
         });
+        if (isTutorial) {
+            animator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    FontUtils.toast(getContext(), "Don\'t get hit by the asteroids!");
+                    play();
+                }
+            });
+        }
         animator.start();
 
         ValueAnimator animator1 = ValueAnimator.ofFloat(speed, 1);
@@ -378,7 +515,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
     public boolean onTouch(View v, MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                if (System.currentTimeMillis() - projectileTime < 350) {
+                if (System.currentTimeMillis() - projectileTime < 350 && (!isTutorial || isUpgraded)) {
                     if (ammoAnimator != null && ammoAnimator.isStarted())
                         ammoAnimator.end();
                     if (ammo > 0) {
@@ -396,6 +533,34 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                             }
                         });
                         ammoAnimator.start();
+                    } else if (isTutorial) {
+                        FontUtils.toast(getContext(), "If you fire too many projectiles, you'll run out of ammo.");
+                        FontUtils.toast(getContext(), "Normally you only get a refill once you destroy 5 asteroids, but just once, here\'s a free one.");
+                        boxes.add(new BoxData(boxBitmap, new BoxData.BoxOpenedListener() {
+                            @Override
+                            public void onBoxOpened(BoxData box) {
+                                isReplenished = true;
+
+                                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        ammoAnimator = ValueAnimator.ofFloat(ammo, weapon.capacity);
+                                        ammoAnimator.setDuration(500);
+                                        ammoAnimator.setInterpolator(new DecelerateInterpolator());
+                                        ammoAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                                            @Override
+                                            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                                                ammo = (float) valueAnimator.getAnimatedValue();
+                                            }
+                                        });
+                                        ammoAnimator.start();
+
+                                        if (listener != null)
+                                            listener.onAmmoReplenished();
+                                    }
+                                });
+                            }
+                        }));
                     } else if (listener != null)
                         listener.onOutOfAmmo();
                     return false;
@@ -433,6 +598,13 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                 if (animator != null && animator.isStarted())
                     animator.cancel();
 
+                if (isTutorial && !isMoved) {
+                    if (System.currentTimeMillis() - projectileTime > 500)
+                        isMoved = true;
+                    else
+                        FontUtils.toast(getContext(), "Hold your finger down longer to move the ship across a greater distance.");
+                }
+
                 float newX = shipPositionX + ((shipPositionX - shipPositionStartX) / 1.5f);
                 if (newX <= 0)
                     newX = 0;
@@ -463,6 +635,8 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
     public interface GameListener {
         void onStop(int score);
         void onAsteroidPassed();
+
+        void onAsteroidHit();
 
         void onWeaponUpgraded(WeaponData weapon);
 

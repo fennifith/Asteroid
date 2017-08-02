@@ -46,6 +46,13 @@
             android:scaleType="centerInside"
             app:srcCompat="@drawable/ic_rank" />
 
+        <ImageView
+            android:id="@+id/about"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/ic_info" />
+
     </LinearLayout>
 
     <LinearLayout

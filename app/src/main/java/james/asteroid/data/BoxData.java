@@ -9,7 +9,7 @@ public class BoxData {
     public Bitmap boxBitmap;
     public float x, y, yDiff, rotation, rotationDiff;
     public Rect position;
-    private BoxOpenedListener listener;
+    public BoxOpenedListener listener;
 
     public BoxData(Bitmap boxBitmap, BoxOpenedListener listener) {
         this.boxBitmap = boxBitmap;
@@ -21,7 +21,7 @@ public class BoxData {
     }
 
     public void open() {
-        listener.onBoxOpened();
+        listener.onBoxOpened(this);
     }
 
     public Matrix next(float speed, int width, int height) {
@@ -47,7 +47,7 @@ public class BoxData {
     }
 
     public interface BoxOpenedListener {
-        void onBoxOpened();
+        void onBoxOpened(BoxData box);
     }
 
 }

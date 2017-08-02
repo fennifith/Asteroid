@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
     private ImageView soundView;
     private ImageView achievementsView;
     private ImageView rankView;
+    private ImageView aboutView;
     private LinearLayout buttonLayout;
     private ImageView pauseView;
     private ImageView stopView;
@@ -117,6 +118,7 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
         soundView = findViewById(R.id.sound);
         achievementsView = findViewById(R.id.achievements);
         rankView = findViewById(R.id.rank);
+        aboutView = findViewById(R.id.about);
         pauseView = findViewById(R.id.pause);
         stopView = findViewById(R.id.stop);
         gameView = findViewById(R.id.game);
@@ -174,10 +176,6 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
 
         appName = getString(R.string.app_name);
         hintStart = getString(R.string.hint_start);
-        animateTitle(true);
-
-        gameView.setListener(this);
-        gameView.setOnClickListener(this);
 
         isMusic = prefs.getBoolean(PreferenceUtils.PREF_MUSIC, true);
         musicEnabled = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(this, R.drawable.ic_music_enabled), colorAccent, colorPrimary);
@@ -233,6 +231,20 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
             }
         });
 
+        aboutView.setImageBitmap(ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(this, R.drawable.ic_info), colorAccent, colorPrimary));
+        aboutView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!gameView.isPlaying() && (animator == null || !animator.isStarted())) {
+                    gameView.setOnClickListener(null);
+                    gameView.playTutorial();
+                    animateTitle(false);
+                    if (isSound)
+                        soundPool.play(hissId, 1, 1, 0, 0, 1);
+                }
+            }
+        });
+
         play = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(this, R.drawable.ic_play), colorAccent, colorPrimary);
         pause = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(this, R.drawable.ic_pause), colorAccent, colorPrimary);
         stop = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(this, R.drawable.ic_stop), colorAccent, colorPrimary);
@@ -281,6 +293,16 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
             player.start();
 
         handler.postDelayed(hintRunnable, 1000);
+
+        gameView.setListener(this);
+
+        if (prefs.getBoolean(PreferenceUtils.PREF_TUTORIAL, true)) {
+            prefs.edit().putBoolean(PreferenceUtils.PREF_TUTORIAL, false).apply();
+            gameView.playTutorial();
+        } else {
+            gameView.setOnClickListener(this);
+            animateTitle(true);
+        }
     }
 
     private void animateTitle(final boolean isVisible) {
@@ -359,8 +381,6 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
 
     @Override
     public void onStop(int score) {
-        if (isSound)
-            soundPool.play(explosion2Id, 1, 1, 0, 0, 1);
         animateTitle(true);
         gameView.setOnClickListener(this);
 
@@ -377,6 +397,12 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
     @Override
     public void onAsteroidPassed() {
 
+    }
+
+    @Override
+    public void onAsteroidHit() {
+        if (isSound)
+            soundPool.play(explosion2Id, 1, 1, 0, 0, 1);
     }
 
     @Override
