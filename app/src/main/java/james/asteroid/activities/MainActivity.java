@@ -407,7 +407,7 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
 
     @Override
     public void onWeaponUpgraded(WeaponData weapon) {
-        FontUtils.toast(this, "Weapon Equipped: " + weapon.getName(this));
+        FontUtils.toast(this, String.format(getString(R.string.msg_weapon_equipped), weapon.getName(this)));
         if (isSound)
             soundPool.play(upgradeId, 1, 1, 0, 0, 1);
     }
@@ -426,7 +426,7 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
 
     @Override
     public void onOutOfAmmo() {
-        FontUtils.toast(this, "Out of ammo :(");
+        FontUtils.toast(this, getString(R.string.msg_out_of_ammo));
         if (isSound) {
             soundPool.play(errorId, 1, 1, 0, 0, 1);
         }

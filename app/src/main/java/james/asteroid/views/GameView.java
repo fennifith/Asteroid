@@ -66,7 +66,6 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
     private boolean isPlaying;
     public int score;
     private float speed = 1;
-    private int distance;
     private float ammo;
     private ValueAnimator ammoAnimator;
 
@@ -154,9 +153,9 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                             @Override
                             public void run() {
                                 if (!isUpgraded)
-                                    FontUtils.toast(getContext(), "Move your ship near the weapon to pick it up.");
+                                    FontUtils.toast(getContext(), getContext().getString(R.string.msg_move_near_weapon));
                                 else
-                                    FontUtils.toast(getContext(), "Move your ship near the ammunition box to pick it up.");
+                                    FontUtils.toast(getContext(), getContext().getString(R.string.msg_move_near_ammunition));
                             }
                         });
                     } else boxes.remove(box);
@@ -176,7 +175,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                         new Handler(Looper.getMainLooper()).post(new Runnable() {
                             @Override
                             public void run() {
-                                FontUtils.toast(getContext(), "Destroy the asteroid to gain a point.");
+                                FontUtils.toast(getContext(), getContext().getString(R.string.msg_destroy_asteroid));
                             }
                         });
                     } else {
@@ -196,7 +195,6 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                 if (isPlaying && !isTutorial && System.currentTimeMillis() - asteroidTime > asteroidLength) {
                     asteroidTime = System.currentTimeMillis();
                     asteroids.add(new AsteroidData(Math.round(Math.random()) == 0 ? asteroidBitmap : asteroidBitmap2));
-                    distance++;
                 }
 
                 float left = canvas.getWidth() * shipPositionX;
@@ -330,9 +328,9 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
                         public void run() {
-                            FontUtils.toast(getContext(), "This is a weapon. Move your ship near it to pick it up.");
-                            FontUtils.toast(getContext(), "You get a new weapon after destroying 20 asteroids.");
-                            FontUtils.toast(getContext(), "There are 12 weapon upgrades in total.");
+                            FontUtils.toast(getContext(), getContext().getString(R.string.msg_this_is_weapon));
+                            FontUtils.toast(getContext(), getContext().getString(R.string.msg_get_weapon));
+                            FontUtils.toast(getContext(), getContext().getString(R.string.msg_weapon_upgrades_total));
                         }
                     });
 
@@ -360,7 +358,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
                         public void run() {
-                            FontUtils.toast(getContext(), "Double tap to fire. Destroy the asteroid to gain a point.");
+                            FontUtils.toast(getContext(), getContext().getString(R.string.msg_double_tap_fire));
                         }
                     });
 
@@ -375,8 +373,8 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
                         public void run() {
-                            FontUtils.toast(getContext(), "Looks like you\'ve used some of your ammo. Here\'s a refill.");
-                            FontUtils.toast(getContext(), "You normally get them after you destroy 5 asteroids.");
+                            FontUtils.toast(getContext(), getContext().getString(R.string.msg_used_ammo));
+                            FontUtils.toast(getContext(), getContext().getString(R.string.msg_get_refill));
                         }
                     });
 
@@ -416,7 +414,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
                         public void run() {
-                            FontUtils.toast(getContext(), "That\'s it for now! Come back anytime by using the info button on the main menu.");
+                            FontUtils.toast(getContext(), getContext().getString(R.string.msg_come_back_anytime));
                         }
                     });
                 }
@@ -463,7 +461,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
         isAsteroid = false;
         isReplenished = false;
         play();
-        FontUtils.toast(getContext(), "Press anywhere on the left or right half of the screen to move your ship.");
+        FontUtils.toast(getContext(), getContext().getString(R.string.msg_press_to_move));
     }
 
     public void stop() {
@@ -488,7 +486,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
             animator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    FontUtils.toast(getContext(), "Don\'t get hit by the asteroids!");
+                    FontUtils.toast(getContext(), getContext().getString(R.string.msg_dont_get_hit));
                     play();
                 }
             });
@@ -554,8 +552,8 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                         });
                         ammoAnimator.start();
                     } else if (isTutorial && boxes.size() == 0) {
-                        FontUtils.toast(getContext(), "If you fire too many projectiles, you'll run out of ammo.");
-                        FontUtils.toast(getContext(), "Normally you only get a refill once you destroy 5 asteroids, but just once, here\'s a free one.");
+                        FontUtils.toast(getContext(), getContext().getString(R.string.msg_too_many_projectiles));
+                        FontUtils.toast(getContext(), getContext().getString(R.string.msg_free_refill));
                         boxes.add(new BoxData(boxBitmap, new BoxData.BoxOpenedListener() {
                             @Override
                             public void onBoxOpened(BoxData box) {
@@ -622,7 +620,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                     if (System.currentTimeMillis() - projectileTime > 500)
                         isMoved = true;
                     else
-                        FontUtils.toast(getContext(), "Hold your finger down longer to move the ship across a greater distance.");
+                        FontUtils.toast(getContext(), getContext().getString(R.string.msg_hold_distance));
                 }
 
                 float newX = shipPositionX + ((shipPositionX - shipPositionStartX) / 1.5f);

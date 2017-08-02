@@ -16,5 +16,22 @@
     <string name="weapon_particles">Particle Cannons</string>
     <string name="weapon_particless">More Particle Cannons</string>
     <string name="weapon">Weapon: %s</string>
+    <string name="msg_out_of_ammo">Out of ammo :(</string>
+    <string name="msg_weapon_equipped">Weapon Equipped: %s</string>
+    <string name="msg_too_many_projectiles">If you fire too many projectiles, you\'ll run out of ammo.</string>
+    <string name="msg_free_refill">Normally you only get a refill once you destroy 5 asteroids, but just once, here\'s a free one.</string>
+    <string name="msg_hold_distance">Hold your finger down longer to move the ship across a greater distance.</string>
+    <string name="msg_dont_get_hit">Don\'t get hit by the asteroids!</string>
+    <string name="msg_press_to_move">Press anywhere on the left or right half of the screen to move your ship.</string>
+    <string name="msg_come_back_anytime">That\'s it for now! Come back anytime by using the info button on the main menu.</string>
+    <string name="msg_get_refill">You normally get them after you destroy 5 asteroids.</string>
+    <string name="msg_used_ammo">Looks like you\'ve used some of your ammo. Here\'s a refill.</string>
+    <string name="msg_double_tap_fire">Double tap to fire. Destroy the asteroid to gain a point.</string>
+    <string name="msg_weapon_upgrades_total">There are 12 weapon upgrades in total.</string>
+    <string name="msg_get_weapon">You get a new weapon after destroying 20 asteroids.</string>
+    <string name="msg_this_is_weapon">This is a weapon. Move your ship near it to pick it up.</string>
+    <string name="msg_destroy_asteroid">Destroy the asteroid to gain a point.</string>
+    <string name="msg_move_near_ammunition">Move your ship near the ammunition box to pick it up.</string>
+    <string name="msg_move_near_weapon">Move your ship near the weapon to pick it up.</string>
 
 </resources>
