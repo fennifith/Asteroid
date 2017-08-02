@@ -374,6 +374,16 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
     }
 
     @Override
+    public void onWeaponUpgraded(WeaponData weapon) {
+        FontUtils.toast(this, "Weapon Equipped: " + weapon.getName(this));
+    }
+
+    @Override
+    public void onAmmoReplenished() {
+
+    }
+
+    @Override
     public void onProjectileFired(WeaponData weapon) {
         if (isSound)
             soundPool.play(weapon.soundId, 1, 1, 0, 0, 1);
