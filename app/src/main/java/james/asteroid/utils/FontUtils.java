@@ -4,7 +4,9 @@ import android.content.Context;
 import android.graphics.LinearGradient;
 import android.graphics.Shader;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.support.v4.content.ContextCompat;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,6 +21,8 @@ public class FontUtils {
     public static void toast(Context context, String message) {
         TextView textView = new TextView(context);
         textView.setText(message);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
+            textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
         textView.setTypeface(getTypeface(context));
         textView.getPaint().setShader(new LinearGradient(
                 0, 0, 0,
@@ -30,7 +34,7 @@ public class FontUtils {
 
         Toast toast = new Toast(context);
         toast.setView(textView);
-        toast.setDuration(Toast.LENGTH_SHORT);
+        toast.setDuration(message.length() > 40 ? Toast.LENGTH_LONG : Toast.LENGTH_SHORT);
         toast.show();
     }
 

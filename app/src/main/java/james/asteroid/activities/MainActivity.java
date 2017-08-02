@@ -278,8 +278,8 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
                     isPaused = false;
                 }
 
+                onStop(gameView.score);
                 gameView.stop();
-                onStop(0);
             }
         });
 
