@@ -28,7 +28,6 @@ import james.asteroid.data.BoxData;
 import james.asteroid.data.ParticleData;
 import james.asteroid.data.ProjectileData;
 import james.asteroid.data.WeaponData;
-import james.asteroid.utils.FontUtils;
 import james.asteroid.utils.ImageUtils;
 
 public class GameView extends SurfaceView implements Runnable, View.OnTouchListener {
@@ -397,7 +396,8 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                             }
                         });
                         ammoAnimator.start();
-                    } else FontUtils.toast(getContext(), "Out of ammo :(");
+                    } else if (listener != null)
+                        listener.onOutOfAmmo();
                     return false;
                 } else projectileTime = System.currentTimeMillis();
 
@@ -468,6 +468,8 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
 
         void onAmmoReplenished();
         void onProjectileFired(WeaponData weapon);
+
+        void onOutOfAmmo();
         void onScoreChanged(int score);
     }
 }

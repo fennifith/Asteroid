@@ -53,6 +53,9 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
     private int buttonId;
     private int hissId;
     private int coinId;
+    private int upgradeId;
+    private int replenishId;
+    private int errorId;
 
     private SharedPreferences prefs;
 
@@ -132,6 +135,9 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
         buttonId = soundPool.load(this, R.raw.button, 1);
         hissId = soundPool.load(this, R.raw.hiss, 1);
         coinId = soundPool.load(this, R.raw.coin, 1);
+        replenishId = soundPool.load(this, R.raw.replenish, 1);
+        upgradeId = soundPool.load(this, R.raw.upgrade, 1);
+        errorId = soundPool.load(this, R.raw.error, 1);
         WeaponData.loadSounds(this, soundPool);
 
         Typeface typeface = FontUtils.getTypeface(this);
@@ -376,17 +382,28 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
     @Override
     public void onWeaponUpgraded(WeaponData weapon) {
         FontUtils.toast(this, "Weapon Equipped: " + weapon.getName(this));
+        if (isSound)
+            soundPool.play(upgradeId, 1, 1, 0, 0, 1);
     }
 
     @Override
     public void onAmmoReplenished() {
-
+        if (isSound)
+            soundPool.play(replenishId, 1, 1, 0, 0, 1);
     }
 
     @Override
     public void onProjectileFired(WeaponData weapon) {
         if (isSound)
             soundPool.play(weapon.soundId, 1, 1, 0, 0, 1);
+    }
+
+    @Override
+    public void onOutOfAmmo() {
+        FontUtils.toast(this, "Out of ammo :(");
+        if (isSound) {
+            soundPool.play(errorId, 1, 1, 0, 0, 1);
+        }
     }
 
     @Override
