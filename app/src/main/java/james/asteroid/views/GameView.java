@@ -553,7 +553,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                             }
                         });
                         ammoAnimator.start();
-                    } else if (isTutorial) {
+                    } else if (isTutorial && boxes.size() == 0) {
                         FontUtils.toast(getContext(), "If you fire too many projectiles, you'll run out of ammo.");
                         FontUtils.toast(getContext(), "Normally you only get a refill once you destroy 5 asteroids, but just once, here\'s a free one.");
                         boxes.add(new BoxData(boxBitmap, new BoxData.BoxOpenedListener() {
