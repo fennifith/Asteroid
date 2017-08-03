@@ -33,13 +33,15 @@
             android:id="@+id/achievements"
             android:layout_width="56dp"
             android:layout_height="56dp"
-            android:scaleType="centerInside" />
+            android:scaleType="centerInside"
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/rank"
             android:layout_width="56dp"
             android:layout_height="56dp"
-            android:scaleType="centerInside" />
+            android:scaleType="centerInside"
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/about"

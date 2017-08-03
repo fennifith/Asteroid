@@ -1,6 +1,7 @@
 package james.asteroid.activities;
 
 import android.animation.ValueAnimator;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.LinearGradient;
@@ -15,6 +16,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -25,6 +28,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.games.Games;
+import com.google.example.games.basegameutils.BaseGameUtils;
+
 import james.asteroid.R;
 import james.asteroid.data.WeaponData;
 import james.asteroid.utils.FontUtils;
@@ -32,7 +40,7 @@ import james.asteroid.utils.ImageUtils;
 import james.asteroid.utils.PreferenceUtils;
 import james.asteroid.views.GameView;
 
-public class MainActivity extends AppCompatActivity implements GameView.GameListener, View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements GameView.GameListener, View.OnClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private TextView titleView;
     private TextView highScoreView;
@@ -76,6 +84,8 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
     private Bitmap pause;
     private Bitmap stop;
 
+    private GoogleApiClient apiClient;
+
     private Handler handler = new Handler();
     private Runnable hintRunnable = new Runnable() {
         @Override
@@ -114,6 +124,12 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
         setContentView(R.layout.activity_main);
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        apiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(Games.API).addScope(Games.SCOPE_GAMES)
+                .build();
 
         titleView = findViewById(R.id.title);
         highScoreView = findViewById(R.id.highScore);
@@ -359,6 +375,18 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        apiClient.connect();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        apiClient.disconnect();
+    }
+
+    @Override
     protected void onDestroy() {
         player.release();
         super.onDestroy();
@@ -435,4 +463,34 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
         }
     }
 
+    private boolean isConnected() {
+        return apiClient != null && apiClient.isConnected();
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        achievementsView.setVisibility(View.VISIBLE);
+        rankView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        apiClient.connect();
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        achievementsView.setVisibility(View.GONE);
+        rankView.setVisibility(View.GONE);
+        BaseGameUtils.resolveConnectionFailure(this, apiClient, connectionResult, 1801, R.string.error);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1801) {
+            if (resultCode == RESULT_OK)
+                apiClient.connect();
+            else FontUtils.toast(this, getString(R.string.error));
+        }
+    }
 }
