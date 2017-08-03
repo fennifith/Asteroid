@@ -11,13 +11,13 @@ import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.DrawableRes;
-import android.support.v4.content.ContextCompat;
+import android.support.graphics.drawable.VectorDrawableCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 
 public class ImageUtils {
 
     public static Bitmap getVectorBitmap(Context context, @DrawableRes int id) {
-        Drawable drawable = ContextCompat.getDrawable(context, id);
+        Drawable drawable = VectorDrawableCompat.create(context.getResources(), id, context.getTheme());
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
             drawable = (DrawableCompat.wrap(drawable)).mutate();
 
