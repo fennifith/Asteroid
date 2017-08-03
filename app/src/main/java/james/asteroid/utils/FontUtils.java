@@ -6,6 +6,7 @@ import android.graphics.Shader;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,6 +35,7 @@ public class FontUtils {
 
         Toast toast = new Toast(context);
         toast.setView(textView);
+        toast.setGravity(Gravity.BOTTOM, 0, ConversionUtils.getPixelsFromDp(64));
         toast.setDuration(message.length() > 40 ? Toast.LENGTH_LONG : Toast.LENGTH_SHORT);
         toast.show();
     }
