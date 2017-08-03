@@ -304,6 +304,9 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
         if (prefs.getBoolean(PreferenceUtils.PREF_TUTORIAL, true)) {
             prefs.edit().putBoolean(PreferenceUtils.PREF_TUTORIAL, false).apply();
             gameView.playTutorial();
+            buttonLayout.setVisibility(View.GONE);
+            pauseView.setVisibility(View.VISIBLE);
+            stopView.setVisibility(View.GONE);
         } else {
             gameView.setOnClickListener(this);
             animateTitle(true);
