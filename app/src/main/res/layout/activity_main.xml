@@ -44,6 +44,13 @@
             android:visibility="gone" />
 
         <ImageView
+            android:id="@+id/games"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:scaleType="centerInside"
+            android:visibility="gone" />
+
+        <ImageView
             android:id="@+id/about"
             android:layout_width="56dp"
             android:layout_height="56dp"
