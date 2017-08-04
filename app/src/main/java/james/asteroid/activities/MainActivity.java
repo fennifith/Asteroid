@@ -382,6 +382,10 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
             buttonLayout.setVisibility(View.VISIBLE);
             pauseView.setVisibility(View.GONE);
             stopView.setVisibility(View.GONE);
+
+            if (prefs.getBoolean(PreferenceUtils.PREF_TUTORIAL, true))
+                aboutView.setVisibility(View.GONE);
+            else aboutView.setVisibility(View.VISIBLE);
         } else {
             buttonLayout.setVisibility(View.GONE);
             pauseView.setVisibility(View.VISIBLE);
