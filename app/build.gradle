@@ -7,8 +7,8 @@ android {
         applicationId "james.asteroid"
         minSdkVersion 16
         targetSdkVersion 26
-        versionCode 4
-        versionName "1.0"
+        versionCode 5
+        versionName "1.1"
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
