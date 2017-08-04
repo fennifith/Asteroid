@@ -1,6 +1,7 @@
 package james.asteroid.utils;
 
 import android.content.Context;
+import android.support.annotation.StringRes;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.games.Games;
@@ -43,46 +44,44 @@ public class AchievementUtils implements GameView.GameListener {
     public void onStop(int score) {
         isTutorial = false;
 
-        if (apiClient.isConnected()) {
-            if (score > 300)
-                Games.Achievements.unlock(apiClient, context.getString(R.string.achievement_extremely_experienced_beginner));
-            else if (score > 200)
-                Games.Achievements.unlock(apiClient, context.getString(R.string.achievement_very_experienced_beginner));
-            else if (score > 100)
-                Games.Achievements.unlock(apiClient, context.getString(R.string.achievement_experienced_beginner));
-            else if (score > 50)
-                Games.Achievements.unlock(apiClient, context.getString(R.string.achievement_beginner));
-        }
+        if (score > 300)
+            unlock(R.string.achievement_extremely_experienced_beginner);
+        else if (score > 200)
+            unlock(R.string.achievement_very_experienced_beginner);
+        else if (score > 100)
+            unlock(R.string.achievement_experienced_beginner);
+        else if (score > 50)
+            unlock(R.string.achievement_beginner);
     }
 
     @Override
     public void onAsteroidPassed() {
         if (!isTutorial) {
-            if (asteroidsHit == 0 && asteroidsPassed == 0 && apiClient.isConnected())
-                Games.Achievements.unlock(apiClient, context.getString(R.string.achievement_coward));
+            if (asteroidsHit == 0 && asteroidsPassed == 0)
+                unlock(R.string.achievement_coward);
             asteroidsPassed++;
         }
     }
 
     @Override
     public void onAsteroidCrashed() {
-        if (!isTutorial && isOutOfAmmo && System.currentTimeMillis() - outOfAmmoTime < 3000 && apiClient.isConnected())
-            Games.Achievements.unlock(apiClient, context.getString(R.string.achievement_almost_had_it));
+        if (!isTutorial && isOutOfAmmo && System.currentTimeMillis() - outOfAmmoTime < 3000)
+            unlock(R.string.achievement_almost_had_it);
     }
 
     @Override
     public void onWeaponUpgraded(WeaponData weapon) {
-        if (weapon.equals(WeaponData.WEAPONS[5]) && apiClient.isConnected())
-            Games.Achievements.unlock(apiClient, context.getString(R.string.achievement_halfway_there));
-        if (weapon.equals(WeaponData.WEAPONS[WeaponData.WEAPONS.length - 1]) && apiClient.isConnected())
-            Games.Achievements.unlock(apiClient, context.getString(R.string.achievement_particle_beam));
+        if (weapon.equals(WeaponData.WEAPONS[5]))
+            unlock(R.string.achievement_halfway_there);
+        if (weapon.equals(WeaponData.WEAPONS[WeaponData.WEAPONS.length - 1]))
+            unlock(R.string.achievement_particle_beam);
     }
 
     @Override
     public void onAmmoReplenished() {
         if (!isTutorial) {
-            if (isOutOfAmmo && apiClient.isConnected())
-                Games.Achievements.unlock(apiClient, context.getString(R.string.achievement_close_call));
+            if (isOutOfAmmo)
+                unlock(R.string.achievement_close_call);
             isOutOfAmmo = false;
         }
     }
@@ -99,15 +98,20 @@ public class AchievementUtils implements GameView.GameListener {
                 outOfAmmoTime = System.currentTimeMillis();
             isOutOfAmmo = true;
 
-            if (System.currentTimeMillis() - outOfAmmoTime > 3000 && apiClient.isConnected())
-                Games.Achievements.unlock(apiClient, context.getString(R.string.achievement_how_did_i_get_here));
+            if (System.currentTimeMillis() - outOfAmmoTime > 3000)
+                unlock(R.string.achievement_how_did_i_get_here);
         }
     }
 
     @Override
     public void onAsteroidHit(int score) {
-        if (!isTutorial && asteroidsHit == 0 && asteroidsPassed == 0 && apiClient.isConnected())
-            Games.Achievements.unlock(apiClient, context.getString(R.string.achievememt_savage));
+        if (!isTutorial && asteroidsHit == 0 && asteroidsPassed == 0)
+            unlock(R.string.achievememt_savage);
         asteroidsHit++;
+    }
+
+    private void unlock(@StringRes int key) {
+        if (apiClient.isConnected())
+            Games.Achievements.unlock(apiClient, context.getString(key));
     }
 }

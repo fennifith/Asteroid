@@ -128,6 +128,12 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
 
+        apiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(Games.API).addScope(Games.SCOPE_GAMES)
+                .build();
+
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         titleView = findViewById(R.id.title);
@@ -350,23 +356,10 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
         handler.postDelayed(hintRunnable, 1000);
 
         gameView.setListener(this);
+        gameView.setOnClickListener(this);
+        animateTitle(true);
 
-        if (prefs.getBoolean(PreferenceUtils.PREF_TUTORIAL, true)) {
-            gameView.playTutorial();
-            buttonLayout.setVisibility(View.GONE);
-            pauseView.setVisibility(View.VISIBLE);
-            stopView.setVisibility(View.GONE);
-        } else {
-            gameView.setOnClickListener(this);
-            animateTitle(true);
-
-            apiClient = new GoogleApiClient.Builder(this)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(Games.API).addScope(Games.SCOPE_GAMES)
-                    .build();
-            apiClient.connect();
-        }
+        apiClient.connect();
     }
 
     private void animateTitle(final boolean isVisible) {
@@ -442,15 +435,6 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
 
     @Override
     public void onTutorialFinish() {
-        if (apiClient == null) {
-            apiClient = new GoogleApiClient.Builder(this)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(Games.API).addScope(Games.SCOPE_GAMES)
-                    .build();
-            apiClient.connect();
-        }
-
         if (achievementUtils != null)
             achievementUtils.onTutorialFinish();
 
@@ -539,7 +523,9 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
     public void onClick(View view) {
         if (!gameView.isPlaying() && (animator == null || !animator.isStarted())) {
             gameView.setOnClickListener(null);
-            gameView.play();
+            if (prefs.getBoolean(PreferenceUtils.PREF_TUTORIAL, true))
+                gameView.playTutorial();
+            else gameView.play();
             animateTitle(false);
             if (isSound)
                 soundPool.play(hissId, 1, 1, 0, 0, 1);
