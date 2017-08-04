@@ -27,6 +27,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -35,6 +36,7 @@ import com.google.example.games.basegameutils.BaseGameUtils;
 
 import james.asteroid.R;
 import james.asteroid.data.WeaponData;
+import james.asteroid.utils.AchievementUtils;
 import james.asteroid.utils.FontUtils;
 import james.asteroid.utils.ImageUtils;
 import james.asteroid.utils.PreferenceUtils;
@@ -85,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
     private Bitmap stop;
 
     private GoogleApiClient apiClient;
+    private AchievementUtils achievementUtils;
 
     private Handler handler = new Handler();
     private Runnable hintRunnable = new Runnable() {
@@ -236,9 +239,9 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
         achievementsView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                startActivityForResult(Games.Achievements.getAchievementsIntent(apiClient), 0);
                 if (isSound)
                     soundPool.play(buttonId, 1, 1, 0, 0, 1);
-                //TODO: open achievements screen
             }
         });
 
@@ -246,9 +249,9 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
         rankView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                startActivityForResult(Games.Leaderboards.getLeaderboardIntent(apiClient, getString(R.string.leaderboard_high_score)), 0);
                 if (isSound)
                     soundPool.play(buttonId, 1, 1, 0, 0, 1);
-                //TODO: open rank screen
             }
         });
 
@@ -326,6 +329,7 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
         } else {
             gameView.setOnClickListener(this);
             animateTitle(true);
+            apiClient.connect();
         }
     }
 
@@ -393,6 +397,18 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
     }
 
     @Override
+    public void onStart(boolean isTutorial) {
+        if (achievementUtils != null)
+            achievementUtils.onStart(isTutorial);
+    }
+
+    @Override
+    public void onTutorialFinish() {
+        if (achievementUtils != null)
+            achievementUtils.onTutorialFinish();
+    }
+
+    @Override
     public void onStop(int score) {
         animateTitle(true);
         gameView.setOnClickListener(this);
@@ -402,20 +418,31 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
             //TODO: awesome high score animation or something
             highScore = score;
             prefs.edit().putInt(PreferenceUtils.PREF_HIGH_SCORE, score).apply();
+
+            if (isConnected())
+                Games.Leaderboards.submitScore(apiClient, getString(R.string.leaderboard_high_score), highScore);
+            else
+                apiClient.connect(); //the user has probably just finished the tutorial - if not this might seem weird but they should probably be signed in anyway
         }
 
         highScoreView.setText(String.format(getString(R.string.score_high), highScore));
+
+        if (achievementUtils != null)
+            achievementUtils.onStop(score);
     }
 
     @Override
     public void onAsteroidPassed() {
-
+        if (achievementUtils != null)
+            achievementUtils.onAsteroidPassed();
     }
 
     @Override
-    public void onAsteroidHit() {
+    public void onAsteroidCrashed() {
         if (isSound)
             soundPool.play(explosion2Id, 1, 1, 0, 0, 1);
+        if (achievementUtils != null)
+            achievementUtils.onAsteroidCrashed();
     }
 
     @Override
@@ -423,33 +450,42 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
         FontUtils.toast(this, String.format(getString(R.string.msg_weapon_equipped), weapon.getName(this)));
         if (isSound)
             soundPool.play(upgradeId, 1, 1, 0, 0, 1);
+        if (achievementUtils != null)
+            achievementUtils.onWeaponUpgraded(weapon);
     }
 
     @Override
     public void onAmmoReplenished() {
         if (isSound)
             soundPool.play(replenishId, 1, 1, 0, 0, 1);
+        if (achievementUtils != null)
+            achievementUtils.onAmmoReplenished();
     }
 
     @Override
     public void onProjectileFired(WeaponData weapon) {
         if (isSound)
             soundPool.play(weapon.soundId, 1, 1, 0, 0, 1);
+        if (achievementUtils != null)
+            achievementUtils.onProjectileFired(weapon);
     }
 
     @Override
     public void onOutOfAmmo() {
         FontUtils.toast(this, getString(R.string.msg_out_of_ammo));
-        if (isSound) {
+        if (isSound)
             soundPool.play(errorId, 1, 1, 0, 0, 1);
-        }
+        if (achievementUtils != null)
+            achievementUtils.onOutOfAmmo();
     }
 
     @Override
-    public void onScoreChanged(int score) {
+    public void onAsteroidHit(int score) {
         titleView.setText(String.valueOf(score));
         if (isSound)
             soundPool.play(explosionId, 1, 1, 0, 0, 1);
+        if (achievementUtils != null)
+            achievementUtils.onAsteroidHit(score);
     }
 
     @Override
@@ -471,6 +507,7 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
     public void onConnected(@Nullable Bundle bundle) {
         achievementsView.setVisibility(View.VISIBLE);
         rankView.setVisibility(View.VISIBLE);
+        achievementUtils = new AchievementUtils(this, apiClient);
     }
 
     @Override
@@ -482,7 +519,7 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         achievementsView.setVisibility(View.GONE);
         rankView.setVisibility(View.GONE);
-        BaseGameUtils.resolveConnectionFailure(this, apiClient, connectionResult, 1801, R.string.error);
+        BaseGameUtils.resolveConnectionFailure(this, apiClient, connectionResult, 1801, R.string.msg_sign_in_error);
     }
 
     @Override
@@ -490,7 +527,8 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
         if (requestCode == 1801) {
             if (resultCode == RESULT_OK)
                 apiClient.connect();
-            else FontUtils.toast(this, getString(R.string.error));
+            else
+                Toast.makeText(this, getString(R.string.msg_sign_in_error), Toast.LENGTH_SHORT).show();
         }
     }
 }

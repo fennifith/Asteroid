@@ -232,7 +232,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                                     @Override
                                     public void run() {
                                         if (listener != null)
-                                            listener.onScoreChanged(++score);
+                                            listener.onAsteroidHit(++score);
 
                                         if (score % 20 == 0 && (score / 20) < (WeaponData.WEAPONS.length - 1)) {
                                             final WeaponData weapon = WeaponData.WEAPONS[score / 20];
@@ -304,7 +304,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                                 @Override
                                 public void run() {
                                     if (listener != null) {
-                                        listener.onAsteroidHit();
+                                        listener.onAsteroidCrashed();
                                         if (!isTutorial)
                                             listener.onStop(score);
                                     }
@@ -415,6 +415,8 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                         @Override
                         public void run() {
                             FontUtils.toast(getContext(), getContext().getString(R.string.msg_come_back_anytime));
+                            if (listener != null)
+                                listener.onTutorialFinish();
                         }
                     });
                 }
@@ -452,6 +454,9 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
         if (!isTutorial)
             weapon = WeaponData.WEAPONS[0];
         setOnTouchListener(this);
+
+        if (listener != null)
+            listener.onStart(isTutorial);
     }
 
     public void playTutorial() {
@@ -651,10 +656,13 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
     }
 
     public interface GameListener {
+        void onStart(boolean isTutorial);
+
+        void onTutorialFinish();
         void onStop(int score);
         void onAsteroidPassed();
 
-        void onAsteroidHit();
+        void onAsteroidCrashed();
 
         void onWeaponUpgraded(WeaponData weapon);
 
@@ -662,6 +670,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
         void onProjectileFired(WeaponData weapon);
 
         void onOutOfAmmo();
-        void onScoreChanged(int score);
+
+        void onAsteroidHit(int score);
     }
 }

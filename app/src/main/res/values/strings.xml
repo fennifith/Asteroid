@@ -33,6 +33,6 @@
     <string name="msg_destroy_asteroid">Destroy the asteroid to gain a point.</string>
     <string name="msg_move_near_ammunition">Move your ship near the ammunition box to pick it up.</string>
     <string name="msg_move_near_weapon">Move your ship near the weapon to pick it up.</string>
-    <string name="error">An error occurred… :P</string>
+    <string name="msg_sign_in_error">An error occurred while trying to sign in… :P</string>
 
 </resources>
