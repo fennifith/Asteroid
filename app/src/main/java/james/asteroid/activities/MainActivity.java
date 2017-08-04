@@ -351,7 +351,6 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
         gameView.setListener(this);
 
         if (prefs.getBoolean(PreferenceUtils.PREF_TUTORIAL, true)) {
-            prefs.edit().putBoolean(PreferenceUtils.PREF_TUTORIAL, false).apply();
             gameView.playTutorial();
             buttonLayout.setVisibility(View.GONE);
             pauseView.setVisibility(View.VISIBLE);
@@ -453,6 +452,8 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
 
         if (achievementUtils != null)
             achievementUtils.onTutorialFinish();
+
+        prefs.edit().putBoolean(PreferenceUtils.PREF_TUTORIAL, false).apply();
     }
 
     @Override
