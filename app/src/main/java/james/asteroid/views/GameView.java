@@ -513,6 +513,10 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
         return isPlaying;
     }
 
+    public boolean isTutorial() {
+        return isTutorial;
+    }
+
     public void onPause() {
         if (thread == null)
             return;

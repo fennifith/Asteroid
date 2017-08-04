@@ -310,7 +310,8 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
                 isPaused = !isPaused;
                 if (isPaused) {
                     pauseView.setImageBitmap(play);
-                    stopView.setVisibility(View.VISIBLE);
+                    if (!gameView.isTutorial())
+                        stopView.setVisibility(View.VISIBLE);
                     gameView.onPause();
                 } else {
                     pauseView.setImageBitmap(pause);
