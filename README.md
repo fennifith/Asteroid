@@ -2,7 +2,7 @@ Asteroid is a simple Android game based on avoiding incoming asteroids. It is ma
 
 |Main Screen|Gameplay|
 |--------|--------|
-|![img](https://theandroidmaster.github.io/apps/asteroid/images/main.png)|![img](https://theandroidmaster.github.io/apps/asteroid/images/main.png)|
+|![img](https://theandroidmaster.github.io/apps/asteroid/images/main.png)|![img](https://theandroidmaster.github.io/apps/asteroid/images/gameplay.png)|
 
 ## License
 
