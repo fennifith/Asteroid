@@ -1,5 +1,7 @@
 package james.asteroid.services;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -7,7 +9,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Handler;
-import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.service.wallpaper.WallpaperService;
 import android.support.v4.content.ContextCompat;
 import android.view.SurfaceHolder;
@@ -22,12 +24,49 @@ import james.asteroid.utils.ImageUtils;
 
 public class BackgroundService extends WallpaperService {
 
+    private static final String PREF_SPEED = "wallpaperSpeed";
+    private static final String PREF_ASTEROIDS = "wallpaperAsteroids";
+    private static final String PREF_ASTEROID_SPEED = "wallpaperAsteroidSpeed";
+    private static final String PREF_ASTEROID_INTERVAL = "wallpaperAsteroidInterval";
+
     @Override
     public Engine onCreateEngine() {
         return new BackgroundEngine();
     }
 
-    private class BackgroundEngine extends Engine {
+    public static void setSpeed(Context context, int speed) {
+        PreferenceManager.getDefaultSharedPreferences(context).edit().putInt(PREF_SPEED, speed).apply();
+    }
+
+    public static void setAsteroids(Context context, boolean isAsteroids) {
+        PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean(PREF_ASTEROIDS, isAsteroids).apply();
+    }
+
+    public static void setAsteroidSpeed(Context context, int speed) {
+        PreferenceManager.getDefaultSharedPreferences(context).edit().putInt(PREF_ASTEROID_SPEED, speed).apply();
+    }
+
+    public static void setAsteroidInterval(Context context, int interval) {
+        PreferenceManager.getDefaultSharedPreferences(context).edit().putInt(PREF_ASTEROID_INTERVAL, interval).apply();
+    }
+
+    public static int getSpeed(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context).getInt(PREF_SPEED, 1);
+    }
+
+    public static boolean isAsteroids(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(PREF_ASTEROIDS, true);
+    }
+
+    public static int getAsteroidSpeed(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context).getInt(PREF_ASTEROID_SPEED, 1);
+    }
+
+    public static int getAsteroidInterval(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context).getInt(PREF_ASTEROID_INTERVAL, 5000);
+    }
+
+    private class BackgroundEngine extends Engine implements SharedPreferences.OnSharedPreferenceChangeListener {
 
         private Paint paint;
         private Paint accentPaint;
@@ -36,24 +75,36 @@ public class BackgroundService extends WallpaperService {
         private Bitmap asteroidBitmap2;
         private List<AsteroidData> asteroids;
         private List<ParticleData> particles;
-        private long asteroidTime, asteroidLength = 5000;
+        private int particleSpeed;
+        private boolean isAsteroids;
+        private int asteroidSpeed;
+        private long asteroidTime;
+        private long asteroidInterval;
 
-        private boolean isVisible;
-        private DrawingThread thread;
+        private SharedPreferences prefs;
+        private Handler handler = new Handler();
+        private Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                draw(getSurfaceHolder());
+            }
+        };
 
         public BackgroundEngine() {
-            thread = new DrawingThread(this);
-            thread.start();
+            prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            updateSettings();
+        }
+
+        private void updateSettings() {
+            particleSpeed = getSpeed(getApplicationContext());
+            isAsteroids = isAsteroids(getApplicationContext());
+            asteroidSpeed = getAsteroidSpeed(getApplicationContext());
+            asteroidInterval = getAsteroidInterval(getApplicationContext());
         }
 
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
-            if (!thread.isAlive()) {
-                thread = new DrawingThread(this);
-                thread.start();
-            }
-
             int colorPrimaryLight = ContextCompat.getColor(getApplicationContext(), R.color.colorPrimaryLight);
             int colorPrimary = ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary);
             int colorAccent = ContextCompat.getColor(getApplicationContext(), R.color.colorAccent);
@@ -74,36 +125,28 @@ public class BackgroundService extends WallpaperService {
             asteroidBitmap = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(getApplicationContext(), R.drawable.ic_asteroid), colorAccent, colorPrimary);
             asteroidBitmap2 = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(getApplicationContext(), R.drawable.ic_asteroid_two), colorAccent, colorPrimary);
             asteroids = new ArrayList<>();
+
+            updateSettings();
+            prefs.registerOnSharedPreferenceChangeListener(this);
+            draw(surfaceHolder);
         }
 
         @Override
-        public void onVisibilityChanged(boolean visible) {
-            super.onVisibilityChanged(visible);
-            isVisible = visible;
+        public void onDestroy() {
+            super.onDestroy();
+            prefs.unregisterOnSharedPreferenceChangeListener(this);
         }
 
         @Override
         public void onSurfaceCreated(SurfaceHolder holder) {
             super.onSurfaceCreated(holder);
-            isVisible = true;
             draw(holder);
-        }
-
-        @Override
-        public void onSurfaceDestroyed(SurfaceHolder holder) {
-            isVisible = false;
-            super.onSurfaceDestroyed(holder);
         }
 
         @Override
         public void onSurfaceRedrawNeeded(SurfaceHolder holder) {
             super.onSurfaceRedrawNeeded(holder);
             draw(holder);
-        }
-
-        @Override
-        public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-            super.onSurfaceChanged(holder, format, width, height);
         }
 
         private void draw(SurfaceHolder holder) {
@@ -121,7 +164,7 @@ public class BackgroundService extends WallpaperService {
             canvas.drawColor(Color.BLACK);
 
             for (ParticleData particle : new ArrayList<>(particles)) {
-                Rect rect = particle.next(1, canvas.getWidth(), canvas.getHeight());
+                Rect rect = particle.next(particleSpeed, canvas.getWidth(), canvas.getHeight());
                 if (rect != null)
                     canvas.drawRect(rect, particle.isAccent ? accentPaint : paint);
                 else particles.remove(particle);
@@ -129,48 +172,29 @@ public class BackgroundService extends WallpaperService {
 
             particles.add(new ParticleData());
 
-            for (AsteroidData asteroid : new ArrayList<>(asteroids)) {
-                Matrix matrix = asteroid.next(1, canvas.getWidth(), canvas.getHeight());
-                if (matrix != null) {
-                    canvas.drawBitmap(asteroid.asteroidBitmap, matrix, paint);
-                } else asteroids.remove(asteroid);
-            }
+            if (isAsteroids) {
+                for (AsteroidData asteroid : new ArrayList<>(asteroids)) {
+                    Matrix matrix = asteroid.next(asteroidSpeed, canvas.getWidth(), canvas.getHeight());
+                    if (matrix != null) {
+                        canvas.drawBitmap(asteroid.asteroidBitmap, matrix, paint);
+                    } else asteroids.remove(asteroid);
+                }
 
-            if (System.currentTimeMillis() - asteroidTime > asteroidLength) {
-                asteroidTime = System.currentTimeMillis();
-                asteroids.add(new AsteroidData(Math.round(Math.random()) == 0 ? asteroidBitmap : asteroidBitmap2));
+                if (System.currentTimeMillis() - asteroidTime > asteroidInterval) {
+                    asteroidTime = System.currentTimeMillis();
+                    asteroids.add(new AsteroidData(Math.round(Math.random()) == 0 ? asteroidBitmap : asteroidBitmap2));
+                }
             }
 
             holder.unlockCanvasAndPost(canvas);
-        }
-    }
 
-    private static class DrawingThread extends Thread {
-
-        private BackgroundEngine engine;
-
-        private DrawingThread(BackgroundEngine engine) {
-            this.engine = engine;
+            handler.removeCallbacks(runnable);
+            handler.postDelayed(runnable, 10);
         }
 
         @Override
-        public void run() {
-            while (true) {
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    return;
-                }
-
-                if (engine.isVisible) {
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            engine.draw(engine.getSurfaceHolder());
-                        }
-                    });
-                }
-            }
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+            updateSettings();
         }
     }
 }

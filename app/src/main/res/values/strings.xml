@@ -37,4 +37,25 @@
     <string name="title_sign_out">Sign Out?</string>
     <string name="msg_sign_out">Are you sure you want to sign out of Play Games?</string>
 
+    <string name="pref_background_speed">Background Speed</string>
+    <string name="pref_background_asteroids">Show Asteroids</string>
+    <string name="pref_background_asteroid_speed">Asteroid Speed</string>
+    <string name="pref_background_asteroid_interval">Asteroid Interval</string>
+
+    <string-array name="pref_speeds">
+        <item>1x</item>
+        <item>2x</item>
+        <item>3x</item>
+        <item>4x</item>
+        <item>5x</item>
+    </string-array>
+
+    <string-array name="pref_intervals">
+        <item>1 second</item>
+        <item>2 seconds</item>
+        <item>3 seconds</item>
+        <item>4 seconds</item>
+        <item>5 seconds</item>
+    </string-array>
+
 </resources>
