@@ -17,6 +17,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -366,7 +367,7 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
         highScoreView.setVisibility(View.GONE);
 
         animator = ValueAnimator.ofFloat(isVisible ? 0 : 1, isVisible ? 1 : 0);
-        animator.setDuration(1500);
+        animator.setDuration(750);
         animator.setStartDelay(500);
         animator.setInterpolator(new AccelerateInterpolator());
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -409,6 +410,36 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
             player.start();
         if (gameView != null && !isPaused)
             gameView.onResume();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            if (Settings.Global.getFloat(getContentResolver(), Settings.Global.ANIMATOR_DURATION_SCALE, 1) != 1) {
+                try {
+                    ValueAnimator.class.getMethod("setDurationScale", float.class).invoke(null, 1f);
+                } catch (Throwable t) {
+                    new AlertDialog.Builder(this)
+                            .setTitle(R.string.title_animation_speed)
+                            .setMessage(R.string.desc_animation_speed)
+                            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    try {
+                                        startActivity(new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS));
+                                    } catch (Exception ignored) {
+                                    }
+                                    dialogInterface.dismiss();
+                                }
+                            })
+                            .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    dialogInterface.dismiss();
+                                }
+                            })
+                            .create()
+                            .show();
+                }
+            }
+        }
     }
 
     @Override

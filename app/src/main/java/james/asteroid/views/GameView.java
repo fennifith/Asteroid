@@ -261,7 +261,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                                                         @Override
                                                         public void run() {
                                                             ammoAnimator = ValueAnimator.ofFloat(ammo, Math.min(ammo + 5, weapon.capacity));
-                                                            ammoAnimator.setDuration(500);
+                                                            ammoAnimator.setDuration(250);
                                                             ammoAnimator.setInterpolator(new DecelerateInterpolator());
                                                             ammoAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                                                                 @Override
@@ -387,7 +387,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                                 @Override
                                 public void run() {
                                     ammoAnimator = ValueAnimator.ofFloat(ammo, weapon.capacity);
-                                    ammoAnimator.setDuration(500);
+                                    ammoAnimator.setDuration(250);
                                     ammoAnimator.setInterpolator(new DecelerateInterpolator());
                                     ammoAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                                         @Override
@@ -442,6 +442,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
             animator.cancel();
 
         ValueAnimator animator = ValueAnimator.ofFloat(shipPositionY, 1);
+        animator.setDuration(150);
         animator.setInterpolator(new DecelerateInterpolator());
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -478,7 +479,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
             animator.cancel();
 
         ValueAnimator animator = ValueAnimator.ofFloat(shipPositionY, -1f);
-        animator.setDuration(2000);
+        animator.setDuration(1000);
         animator.setInterpolator(new DecelerateInterpolator());
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -499,6 +500,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
         animator.start();
 
         ValueAnimator animator1 = ValueAnimator.ofFloat(speed, 1);
+        animator1.setDuration(150);
         animator1.setInterpolator(new DecelerateInterpolator());
         animator1.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -551,7 +553,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                             listener.onProjectileFired(weapon);
 
                         ammoAnimator = ValueAnimator.ofFloat(ammo, ammo - 1);
-                        ammoAnimator.setDuration(500);
+                        ammoAnimator.setDuration(250);
                         ammoAnimator.setInterpolator(new DecelerateInterpolator());
                         ammoAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                             @Override
@@ -572,7 +574,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                                     @Override
                                     public void run() {
                                         ammoAnimator = ValueAnimator.ofFloat(ammo, weapon.capacity);
-                                        ammoAnimator.setDuration(500);
+                                        ammoAnimator.setDuration(250);
                                         ammoAnimator.setInterpolator(new DecelerateInterpolator());
                                         ammoAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                                             @Override
@@ -603,7 +605,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                 } else if (shipPositionX > 0)
                     animator = ValueAnimator.ofFloat(shipPositionX, shipPositionX - 1);
 
-                animator.setDuration((long) (2000 / speed));
+                animator.setDuration((long) (1000 / speed));
                 animator.setStartDelay(50);
                 animator.setInterpolator(new AccelerateInterpolator());
                 animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -640,7 +642,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
 
                 animator = ValueAnimator.ofFloat(shipPositionX, newX);
                 animator.setInterpolator(new DecelerateInterpolator());
-                animator.setDuration((long) (1000 / speed));
+                animator.setDuration((long) (500 / speed));
                 animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                     @Override
                     public void onAnimationUpdate(ValueAnimator valueAnimator) {
