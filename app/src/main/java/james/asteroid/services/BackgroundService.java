@@ -2,10 +2,8 @@ package james.asteroid.services;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -13,13 +11,9 @@ import android.service.wallpaper.WallpaperService;
 import android.support.v4.content.ContextCompat;
 import android.view.SurfaceHolder;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import james.asteroid.R;
-import james.asteroid.data.AsteroidData;
+import james.asteroid.data.drawer.AsteroidDrawer;
 import james.asteroid.data.drawer.BackgroundDrawer;
-import james.asteroid.utils.ImageUtils;
 
 public class BackgroundService extends WallpaperService {
 
@@ -70,10 +64,8 @@ public class BackgroundService extends WallpaperService {
         private Paint paint;
         private Paint accentPaint;
 
-        private Bitmap asteroidBitmap;
-        private Bitmap asteroidBitmap2;
-        private List<AsteroidData> asteroids;
         private BackgroundDrawer background;
+        private AsteroidDrawer asteroids;
         private int particleSpeed;
         private boolean isAsteroids;
         private int asteroidSpeed;
@@ -120,10 +112,6 @@ public class BackgroundService extends WallpaperService {
 
             background = new BackgroundDrawer(paint, accentPaint);
 
-            asteroidBitmap = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(getApplicationContext(), R.drawable.ic_asteroid), colorAccent, colorPrimary);
-            asteroidBitmap2 = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(getApplicationContext(), R.drawable.ic_asteroid_two), colorAccent, colorPrimary);
-            asteroids = new ArrayList<>();
-
             updateSettings();
             prefs.registerOnSharedPreferenceChangeListener(this);
             draw(surfaceHolder);
@@ -162,20 +150,6 @@ public class BackgroundService extends WallpaperService {
             canvas.drawColor(Color.BLACK);
 
             background.draw(canvas, particleSpeed);
-
-            if (isAsteroids) {
-                for (AsteroidData asteroid : new ArrayList<>(asteroids)) {
-                    Matrix matrix = asteroid.next(asteroidSpeed, canvas.getWidth(), canvas.getHeight());
-                    if (matrix != null) {
-                        canvas.drawBitmap(asteroid.asteroidBitmap, matrix, paint);
-                    } else asteroids.remove(asteroid);
-                }
-
-                if (System.currentTimeMillis() - asteroidTime > asteroidInterval) {
-                    asteroidTime = System.currentTimeMillis();
-                    asteroids.add(new AsteroidData(Math.round(Math.random()) == 0 ? asteroidBitmap : asteroidBitmap2));
-                }
-            }
 
             holder.unlockCanvasAndPost(canvas);
 

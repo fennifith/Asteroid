@@ -27,9 +27,9 @@ import java.util.List;
 import james.asteroid.R;
 import james.asteroid.data.AsteroidData;
 import james.asteroid.data.BoxData;
-import james.asteroid.data.ParticleData;
 import james.asteroid.data.ProjectileData;
 import james.asteroid.data.WeaponData;
+import james.asteroid.data.drawer.AsteroidDrawer;
 import james.asteroid.data.drawer.BackgroundDrawer;
 import james.asteroid.utils.FontUtils;
 import james.asteroid.utils.ImageUtils;
@@ -49,11 +49,6 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
     private float shipPositionStartX;
     private float shipRotation;
 
-    private Bitmap asteroidBitmap;
-    private Bitmap asteroidBitmap2;
-    private List<AsteroidData> asteroids;
-    private long asteroidTime, asteroidLength;
-
     private Bitmap boxBitmap;
     private List<BoxData> boxes;
 
@@ -62,6 +57,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
     private long projectileTime;
 
     private BackgroundDrawer background;
+    private AsteroidDrawer asteroids;
 
     private ValueAnimator animator;
     private GameListener listener;
@@ -110,14 +106,11 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
         cloudPaint.setAntiAlias(true);
 
         background = new BackgroundDrawer(paint, cloudPaint);
+        asteroids = new AsteroidDrawer(getContext(), colorAccent, colorPrimary, paint, accentPaint);
 
         projectiles = new ArrayList<>();
 
         shipBitmap = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(getContext(), R.drawable.ic_ship), colorAccent, colorPrimary);
-
-        asteroidBitmap = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(getContext(), R.drawable.ic_asteroid), colorAccent, colorPrimary);
-        asteroidBitmap2 = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(getContext(), R.drawable.ic_asteroid_two), colorAccent, colorPrimary);
-        asteroids = new ArrayList<>();
 
         boxBitmap = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(getContext(), R.drawable.ic_box), colorAccent, colorPrimary);
         boxes = new ArrayList<>();
@@ -138,6 +131,14 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                 canvas.drawColor(Color.BLACK);
 
                 background.draw(canvas, speed);
+                if (asteroids.draw(canvas, speed)) {
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            listener.onAsteroidPassed();
+                        }
+                    });
+                }
 
                 for (BoxData box : new ArrayList<>(boxes)) {
                     Matrix matrix = box.next(speed, canvas.getWidth(), canvas.getHeight());
@@ -161,42 +162,6 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                     } else boxes.remove(box);
                 }
 
-                for (AsteroidData asteroid : new ArrayList<>(asteroids)) {
-                    Matrix matrix = asteroid.next(speed, canvas.getWidth(), canvas.getHeight());
-                    if (matrix != null) {
-                        canvas.drawBitmap(asteroid.asteroidBitmap, matrix, paint);
-                    } else if (isTutorial && !isAsteroid) {
-                        asteroids.remove(asteroid);
-                        AsteroidData asteroid2 = new AsteroidData(asteroidBitmap);
-                        asteroid2.x = 0.5f;
-                        asteroid2.yDiff = 2;
-                        asteroid2.xDiff = 0;
-                        asteroids.add(asteroid2);
-                        new Handler(Looper.getMainLooper()).post(new Runnable() {
-                            @Override
-                            public void run() {
-                                FontUtils.toast(getContext(), getContext().getString(R.string.msg_destroy_asteroid));
-                            }
-                        });
-                    } else {
-                        asteroids.remove(asteroid);
-                        if (asteroidLength > 750)
-                            asteroidLength -= (asteroidLength * 0.1);
-                        new Handler(Looper.getMainLooper()).post(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (listener != null)
-                                    listener.onAsteroidPassed();
-                            }
-                        });
-                    }
-                }
-
-                if (isPlaying && !isTutorial && System.currentTimeMillis() - asteroidTime > asteroidLength) {
-                    asteroidTime = System.currentTimeMillis();
-                    asteroids.add(new AsteroidData(Math.round(Math.random()) == 0 ? asteroidBitmap : asteroidBitmap2));
-                }
-
                 float left = canvas.getWidth() * shipPositionX;
                 float top = canvas.getHeight() - (shipBitmap.getHeight() * shipPositionY);
 
@@ -216,74 +181,64 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                 for (ProjectileData projectile : new ArrayList<>(projectiles)) {
                     Rect rect = projectile.next(speed, canvas.getWidth(), canvas.getHeight());
                     if (rect != null) {
-                        for (AsteroidData asteroid : new ArrayList<>(asteroids)) {
-                            if (isPlaying && asteroid.position != null && rect.intersect(asteroid.position)) {
-                                projectiles.remove(projectile);
-                                asteroids.remove(asteroid);
+                        AsteroidData asteroid = asteroids.asteroidAt(rect);
+                        if (isPlaying && asteroid != null) {
+                            projectiles.remove(projectile);
+                            asteroids.destroy(asteroid);
 
-                                for (int i = 0; i < 50; i++) {
-                                    background.addParticle(new ParticleData(accentPaint, (float) rect.left / canvas.getWidth(), rect.top));
-                                }
+                            speed += 0.02;
+                            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (listener != null)
+                                        listener.onAsteroidHit(++score);
 
-                                if (isTutorial)
-                                    isAsteroid = true;
-
-                                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        if (listener != null)
-                                            listener.onAsteroidHit(++score);
-
-                                        if (score % 20 == 0 && (score / 20) < (WeaponData.WEAPONS.length - 1)) {
-                                            final WeaponData weapon = WeaponData.WEAPONS[score / 20];
-                                            boxes.add(new BoxData(weapon.getBitmap(getContext()), new BoxData.BoxOpenedListener() {
-                                                @Override
-                                                public void onBoxOpened(BoxData box) {
-                                                    GameView.this.weapon = weapon;
-                                                    if (weapon.capacity < ammo)
-                                                        ammo = weapon.capacity;
-                                                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                                                        @Override
-                                                        public void run() {
-                                                            if (listener != null)
-                                                                listener.onWeaponUpgraded(weapon);
-                                                        }
-                                                    });
-                                                }
-                                            }));
-                                        }
-
-                                        if (score % 5 == 0) {
-                                            boxes.add(new BoxData(boxBitmap, new BoxData.BoxOpenedListener() {
-                                                @Override
-                                                public void onBoxOpened(BoxData box) {
-                                                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                                                        @Override
-                                                        public void run() {
-                                                            ammoAnimator = ValueAnimator.ofFloat(ammo, Math.min(ammo + 5, weapon.capacity));
-                                                            ammoAnimator.setDuration(250);
-                                                            ammoAnimator.setInterpolator(new DecelerateInterpolator());
-                                                            ammoAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                                                                @Override
-                                                                public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                                                                    ammo = (float) valueAnimator.getAnimatedValue();
-                                                                }
-                                                            });
-                                                            ammoAnimator.start();
-
-                                                            if (listener != null)
-                                                                listener.onAmmoReplenished();
-                                                        }
-                                                    });
-                                                }
-                                            }));
-                                        }
+                                    if (score % 20 == 0 && (score / 20) < (WeaponData.WEAPONS.length - 1)) {
+                                        final WeaponData weapon = WeaponData.WEAPONS[score / 20];
+                                        boxes.add(new BoxData(weapon.getBitmap(getContext()), new BoxData.BoxOpenedListener() {
+                                            @Override
+                                            public void onBoxOpened(BoxData box) {
+                                                GameView.this.weapon = weapon;
+                                                if (weapon.capacity < ammo)
+                                                    ammo = weapon.capacity;
+                                                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        if (listener != null)
+                                                            listener.onWeaponUpgraded(weapon);
+                                                    }
+                                                });
+                                            }
+                                        }));
                                     }
-                                });
 
-                                speed += 0.02;
-                                break;
-                            }
+                                    if (score % 5 == 0) {
+                                        boxes.add(new BoxData(boxBitmap, new BoxData.BoxOpenedListener() {
+                                            @Override
+                                            public void onBoxOpened(BoxData box) {
+                                                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        ammoAnimator = ValueAnimator.ofFloat(ammo, Math.min(ammo + 5, weapon.capacity));
+                                                        ammoAnimator.setDuration(250);
+                                                        ammoAnimator.setInterpolator(new DecelerateInterpolator());
+                                                        ammoAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                                                            @Override
+                                                            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                                                                ammo = (float) valueAnimator.getAnimatedValue();
+                                                            }
+                                                        });
+                                                        ammoAnimator.start();
+
+                                                        if (listener != null)
+                                                            listener.onAmmoReplenished();
+                                                    }
+                                                });
+                                            }
+                                        }));
+                                    }
+                                }
+                            });
                         }
 
                         canvas.drawRect(rect, paint);
@@ -298,22 +253,19 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                         canvas.drawRect(0, (float) canvas.getHeight() - 5, canvas.getWidth() * (ammo / weapon.capacity), (float) canvas.getHeight(), accentPaint);
                     }
 
-                    for (AsteroidData asteroid : asteroids) {
-                        if (asteroid.position != null && position.intersect(asteroid.position)) {
-                            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (listener != null) {
-                                        listener.onAsteroidCrashed();
-                                        if (!isTutorial)
-                                            listener.onStop(score);
-                                    }
-
-                                    if (!isTutorial)
-                                        stop();
+                    AsteroidData asteroid = asteroids.asteroidAt(position);
+                    if (asteroid != null) {
+                        new Handler(Looper.getMainLooper()).post(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (listener != null) {
+                                    listener.onAsteroidCrashed();
+                                    listener.onStop(score);
                                 }
-                            });
-                        }
+
+                                stop();
+                            }
+                        });
                     }
 
                     for (final BoxData box : new ArrayList<>(boxes)) {
@@ -322,103 +274,6 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                             boxes.remove(box);
                         }
                     }
-                }
-
-                if (isTutorial && isMoved && !isUpgraded && boxes.size() == 0) {
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            FontUtils.toast(getContext(), getContext().getString(R.string.msg_this_is_weapon));
-                            FontUtils.toast(getContext(), getContext().getString(R.string.msg_get_weapon));
-                            FontUtils.toast(getContext(), getContext().getString(R.string.msg_weapon_upgrades_total));
-                        }
-                    });
-
-                    BoxData box = new BoxData(WeaponData.WEAPONS[0].getBitmap(getContext()), new BoxData.BoxOpenedListener() {
-                        @Override
-                        public void onBoxOpened(BoxData box) {
-                            weapon = WeaponData.WEAPONS[0];
-                            isUpgraded = true;
-
-                            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (listener != null)
-                                        listener.onWeaponUpgraded(weapon);
-                                }
-                            });
-                        }
-                    });
-                    box.x = 0.5f;
-                    box.yDiff = 2;
-                    boxes.add(box);
-                }
-
-                if (isTutorial && isUpgraded && !isAsteroid && asteroids.size() == 0) {
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            FontUtils.toast(getContext(), getContext().getString(R.string.msg_double_tap_fire));
-                        }
-                    });
-
-                    AsteroidData asteroid = new AsteroidData(asteroidBitmap);
-                    asteroid.x = 0.5f;
-                    asteroid.yDiff = 2;
-                    asteroid.xDiff = 0;
-                    asteroids.add(asteroid);
-                }
-
-                if (isTutorial && isAsteroid && !isReplenished && boxes.size() == 0) {
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            FontUtils.toast(getContext(), getContext().getString(R.string.msg_used_ammo));
-                            FontUtils.toast(getContext(), getContext().getString(R.string.msg_get_refill));
-                        }
-                    });
-
-                    BoxData box = new BoxData(boxBitmap, new BoxData.BoxOpenedListener() {
-                        @Override
-                        public void onBoxOpened(BoxData box) {
-                            isReplenished = true;
-
-                            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    ammoAnimator = ValueAnimator.ofFloat(ammo, weapon.capacity);
-                                    ammoAnimator.setDuration(250);
-                                    ammoAnimator.setInterpolator(new DecelerateInterpolator());
-                                    ammoAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                                        @Override
-                                        public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                                            ammo = (float) valueAnimator.getAnimatedValue();
-                                        }
-                                    });
-                                    ammoAnimator.start();
-
-                                    if (listener != null)
-                                        listener.onAmmoReplenished();
-                                }
-                            });
-                        }
-                    });
-                    box.x = 0.5f;
-                    box.yDiff = 2;
-                    boxes.add(box);
-                }
-
-                if (isTutorial && isReplenished) {
-                    isTutorial = false;
-
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            FontUtils.toast(getContext(), getContext().getString(R.string.msg_come_back_anytime));
-                            if (listener != null)
-                                listener.onTutorialFinish();
-                        }
-                    });
                 }
 
                 surfaceHolder.unlockCanvasAndPost(canvas);
@@ -433,8 +288,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
         ammo = 15;
         shipPositionX = 0.5f;
         shipRotation = 0;
-        asteroidLength = 3000;
-        asteroids.clear();
+        asteroids.setMakeAsteroids(true);
         projectiles.clear();
         boxes.clear();
 
@@ -460,20 +314,11 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
             listener.onStart(isTutorial);
     }
 
-    public void playTutorial() {
-        isTutorial = true;
-        isMoved = false;
-        isUpgraded = false;
-        isAsteroid = false;
-        isReplenished = false;
-        play();
-        FontUtils.toast(getContext(), getContext().getString(R.string.msg_press_to_move));
-    }
-
     public void stop() {
         isPlaying = false;
         isTutorial = false;
         setOnTouchListener(null);
+        asteroids.setMakeAsteroids(false);
 
         if (animator != null && animator.isStarted())
             animator.cancel();
