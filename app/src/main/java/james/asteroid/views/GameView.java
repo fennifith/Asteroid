@@ -30,6 +30,7 @@ import james.asteroid.data.BoxData;
 import james.asteroid.data.ParticleData;
 import james.asteroid.data.ProjectileData;
 import james.asteroid.data.WeaponData;
+import james.asteroid.data.drawer.BackgroundDrawer;
 import james.asteroid.utils.FontUtils;
 import james.asteroid.utils.ImageUtils;
 
@@ -59,7 +60,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
     private List<ProjectileData> projectiles;
     private long projectileTime;
 
-    private List<ParticleData> particles;
+    private BackgroundDrawer background;
 
     private ValueAnimator animator;
     private GameListener listener;
@@ -101,8 +102,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
         accentPaint.setStyle(Paint.Style.FILL);
         accentPaint.setAntiAlias(true);
 
-        particles = new ArrayList<>();
-        particles.add(new ParticleData());
+        background = new BackgroundDrawer(paint);
 
         projectiles = new ArrayList<>();
 
@@ -130,14 +130,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
 
                 canvas.drawColor(Color.BLACK);
 
-                for (ParticleData particle : new ArrayList<>(particles)) {
-                    Rect rect = particle.next(speed, canvas.getWidth(), canvas.getHeight());
-                    if (rect != null)
-                        canvas.drawRect(rect, particle.isAccent ? accentPaint : paint);
-                    else particles.remove(particle);
-                }
-
-                particles.add(new ParticleData());
+                background.draw(canvas, speed);
 
                 for (BoxData box : new ArrayList<>(boxes)) {
                     Matrix matrix = box.next(speed, canvas.getWidth(), canvas.getHeight());
@@ -222,7 +215,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                                 asteroids.remove(asteroid);
 
                                 for (int i = 0; i < 50; i++) {
-                                    particles.add(new ParticleData((float) rect.left / canvas.getWidth(), rect.top));
+                                    background.addParticle(new ParticleData(accentPaint, (float) rect.left / canvas.getWidth(), rect.top));
                                 }
 
                                 if (isTutorial)

@@ -7,7 +7,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.service.wallpaper.WallpaperService;
@@ -19,7 +18,7 @@ import java.util.List;
 
 import james.asteroid.R;
 import james.asteroid.data.AsteroidData;
-import james.asteroid.data.ParticleData;
+import james.asteroid.data.drawer.BackgroundDrawer;
 import james.asteroid.utils.ImageUtils;
 
 public class BackgroundService extends WallpaperService {
@@ -74,7 +73,7 @@ public class BackgroundService extends WallpaperService {
         private Bitmap asteroidBitmap;
         private Bitmap asteroidBitmap2;
         private List<AsteroidData> asteroids;
-        private List<ParticleData> particles;
+        private BackgroundDrawer background;
         private int particleSpeed;
         private boolean isAsteroids;
         private int asteroidSpeed;
@@ -119,8 +118,7 @@ public class BackgroundService extends WallpaperService {
             accentPaint.setStyle(Paint.Style.FILL);
             accentPaint.setAntiAlias(true);
 
-            particles = new ArrayList<>();
-            particles.add(new ParticleData());
+            background = new BackgroundDrawer(paint);
 
             asteroidBitmap = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(getApplicationContext(), R.drawable.ic_asteroid), colorAccent, colorPrimary);
             asteroidBitmap2 = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(getApplicationContext(), R.drawable.ic_asteroid_two), colorAccent, colorPrimary);
@@ -163,14 +161,7 @@ public class BackgroundService extends WallpaperService {
 
             canvas.drawColor(Color.BLACK);
 
-            for (ParticleData particle : new ArrayList<>(particles)) {
-                Rect rect = particle.next(particleSpeed, canvas.getWidth(), canvas.getHeight());
-                if (rect != null)
-                    canvas.drawRect(rect, particle.isAccent ? accentPaint : paint);
-                else particles.remove(particle);
-            }
-
-            particles.add(new ParticleData());
+            background.draw(canvas, particleSpeed);
 
             if (isAsteroids) {
                 for (AsteroidData asteroid : new ArrayList<>(asteroids)) {
