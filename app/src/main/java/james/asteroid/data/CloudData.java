@@ -6,7 +6,7 @@ import android.graphics.Rect;
 
 public class CloudData extends DrawerData {
 
-    private int y;
+    private int y = -10;
     private float start, end;
 
     public CloudData(Paint paint, float start, float end) {
@@ -24,11 +24,11 @@ public class CloudData extends DrawerData {
     }
 
     public Rect next(float speed, int width, int height) {
-        if (y >= 0 && y <= height) {
+        if (y <= height) {
             y++;
         } else return null;
 
-        return new Rect((int) (start * width), y - 10, (int) (end * width), y);
+        return new Rect((int) (start * width), y, (int) (end * width), y + 10);
     }
 
     @Override

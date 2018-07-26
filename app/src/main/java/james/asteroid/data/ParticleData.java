@@ -7,7 +7,7 @@ import android.graphics.Rect;
 public class ParticleData extends DrawerData {
 
     public float x, y, xDiff, yDiff;
-    public float size, sizeDiff, sizeDiffDiff;
+    public Float size, sizeDiff, sizeDiffDiff;
     public float rotate, rotateDiff;
 
     public ParticleData(Paint paint) {
@@ -22,8 +22,8 @@ public class ParticleData extends DrawerData {
         this.y = y;
         xDiff = ((float) (Math.random() + 0.2) - 0.5f) * 0.016f;
         yDiff = ((float) (Math.random() + 0.2) - 0.5f) * 16;
-        size = 1;
-        sizeDiff = 4;
+        size = 1f;
+        sizeDiff = 4f;
         sizeDiffDiff = -0.2f;
         rotate = (float) Math.random() * 360;
         rotateDiff = (float) Math.random() * 10;
@@ -35,10 +35,12 @@ public class ParticleData extends DrawerData {
             x += xDiff * speed;
         } else return null;
 
-        size += sizeDiff;
-        sizeDiff += sizeDiffDiff;
-        if (size < 2)
-            size = 2;
+        if (size != null && sizeDiff != null && sizeDiffDiff != null) {
+            size += sizeDiff;
+            sizeDiff += sizeDiffDiff;
+            if (size < 2)
+                return null;
+        } else size = 2f;
 
         rotate += rotateDiff;
 
