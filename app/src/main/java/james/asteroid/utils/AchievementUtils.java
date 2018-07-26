@@ -106,7 +106,7 @@ public class AchievementUtils implements GameView.GameListener {
     @Override
     public void onAsteroidHit(int score) {
         if (!isTutorial && asteroidsHit == 0 && asteroidsPassed == 0)
-            unlock(R.string.achievememt_savage);
+            unlock(R.string.achievement_savage);
         asteroidsHit++;
     }
 

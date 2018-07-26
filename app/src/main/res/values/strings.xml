@@ -3,6 +3,20 @@
     <string name="hint_start">Press to Start</string>
     <string name="score_high">High Score: %d</string>
 
+    <!-- play games ids -->
+    <string name="achievement_extremely_experienced_beginner">CgkI7auAgfUYEAIQDA</string>
+    <string name="achievement_very_experienced_beginner">CgkI7auAgfUYEAIQCw</string>
+    <string name="achievement_experienced_beginner">CgkI7auAgfUYEAIQCg</string>
+    <string name="achievement_beginner">CgkI7auAgfUYEAIQCQ</string>
+    <string name="achievement_coward">CgkI7auAgfUYEAIQAg</string>
+    <string name="achievement_savage">CgkI7auAgfUYEAIQAw</string>
+    <string name="achievement_almost_had_it">CgkI7auAgfUYEAIQBg</string>
+    <string name="achievement_particle_beam">CgkI7auAgfUYEAIQCA</string>
+    <string name="achievement_how_did_i_get_here">CgkI7auAgfUYEAIQBA</string>
+    <string name="achievement_halfway_there">CgkI7auAgfUYEAIQBw</string>
+    <string name="achievement_close_call">CgkI7auAgfUYEAIQBQ</string>
+    <string name="leaderboard_high_score">CgkI7auAgfUYEAIQAQ</string>
+
     <string name="weapon_pellet">Pellet Gun</string>
     <string name="weapon_watermelon">Watermelon Cannon</string>
     <string name="weapon_grape">Grape Shooter</string>
