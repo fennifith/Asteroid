@@ -38,6 +38,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
 
     private Paint paint;
     private Paint accentPaint;
+    private Paint cloudPaint;
     private SurfaceHolder surfaceHolder;
     private boolean isRunning;
     private Thread thread;
@@ -102,7 +103,13 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
         accentPaint.setStyle(Paint.Style.FILL);
         accentPaint.setAntiAlias(true);
 
-        background = new BackgroundDrawer(paint);
+        cloudPaint = new Paint();
+        cloudPaint.setColor(colorPrimaryLight);
+        cloudPaint.setAlpha(50);
+        cloudPaint.setStyle(Paint.Style.FILL);
+        cloudPaint.setAntiAlias(true);
+
+        background = new BackgroundDrawer(paint, cloudPaint);
 
         projectiles = new ArrayList<>();
 

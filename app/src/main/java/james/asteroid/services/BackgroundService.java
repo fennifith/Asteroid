@@ -118,7 +118,7 @@ public class BackgroundService extends WallpaperService {
             accentPaint.setStyle(Paint.Style.FILL);
             accentPaint.setAntiAlias(true);
 
-            background = new BackgroundDrawer(paint);
+            background = new BackgroundDrawer(paint, accentPaint);
 
             asteroidBitmap = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(getApplicationContext(), R.drawable.ic_asteroid), colorAccent, colorPrimary);
             asteroidBitmap2 = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(getApplicationContext(), R.drawable.ic_asteroid_two), colorAccent, colorPrimary);
