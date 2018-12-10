@@ -16,7 +16,9 @@ package com.google.example.games.basegameutils;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
+
 import android.util.Log;
 
 import com.google.android.gms.common.api.CommonStatusCodes;

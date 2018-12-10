@@ -3,13 +3,13 @@ package james.asteroid.data;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.media.SoundPool;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.RawRes;
-import android.support.annotation.StringRes;
-import android.support.v4.content.ContextCompat;
 
 import java.util.List;
 
+import androidx.annotation.DrawableRes;
+import androidx.annotation.RawRes;
+import androidx.annotation.StringRes;
+import androidx.core.content.ContextCompat;
 import james.asteroid.R;
 import james.asteroid.utils.ImageUtils;
 

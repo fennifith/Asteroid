@@ -8,9 +8,9 @@ import android.graphics.Paint;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.service.wallpaper.WallpaperService;
-import android.support.v4.content.ContextCompat;
 import android.view.SurfaceHolder;
 
+import androidx.core.content.ContextCompat;
 import james.asteroid.R;
 import james.asteroid.data.drawer.AsteroidDrawer;
 import james.asteroid.data.drawer.BackgroundDrawer;

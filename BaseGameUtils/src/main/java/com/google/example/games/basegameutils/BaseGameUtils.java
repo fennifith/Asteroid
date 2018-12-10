@@ -2,8 +2,10 @@ package com.google.example.games.basegameutils;
 
 import android.app.Dialog;
 import android.content.IntentSender;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;

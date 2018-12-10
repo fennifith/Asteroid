@@ -18,10 +18,11 @@ package com.google.example.games.basegameutils;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.google.android.gms.common.api.GoogleApiClient;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 /**
  * Example base class for games. This implementation takes care of setting up
