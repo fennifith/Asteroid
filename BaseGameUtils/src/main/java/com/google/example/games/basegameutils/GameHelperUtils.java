@@ -1,10 +1,10 @@
 package com.google.example.games.basegameutils;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.content.res.Resources;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -36,9 +36,9 @@ class GameHelperUtils {
 
     static String activityResponseCodeToString(int respCode) {
         switch (respCode) {
-            case Activity.RESULT_OK:
+            case AppCompatActivity.RESULT_OK:
                 return "RESULT_OK";
-            case Activity.RESULT_CANCELED:
+            case AppCompatActivity.RESULT_CANCELED:
                 return "RESULT_CANCELED";
             case GamesActivityResultCodes.RESULT_APP_MISCONFIGURED:
                 return "RESULT_APP_MISCONFIGURED";
