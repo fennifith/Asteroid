@@ -6,8 +6,7 @@ All in-game graphics are either stored as vector drawables or drawn during runti
 
 |Main Screen|Gameplay|
 |--------|--------|
-|![img](./.github/main.png)
-|![img](./.github/gameplay.png)|
+|![img](./.github/main.png)|![img](./.github/gameplay.png)|
 
 
 ## Install
