@@ -229,20 +229,16 @@ public class SnapshotCoordinator implements Snapshots {
             setIsOpening(filename);
             try {
                 return new CoordinatedPendingResult<>(
-                        Games.Snapshots.open(googleApiClient, filename, createIfNotFound),
-                        new ResultListener() {
-                            @Override
-                            public void onResult(Result result) {
-                                // if open failed, set the file to closed, otherwise, keep it open.
-                                if (!result.getStatus().isSuccess()) {
-                                    Log.d(TAG, "Open was not a success: " +
-                                            result.getStatus() + " for filename " + filename);
-                                    setClosed(filename);
-                                } else {
-                                    Log.d(TAG, "Open successful: " + filename);
-                                }
-                            }
-                        });
+                        Games.Snapshots.open(googleApiClient, filename, createIfNotFound), result -> {
+                    // if open failed, set the file to closed, otherwise, keep it open.
+                    if (!result.getStatus().isSuccess()) {
+                        Log.d(TAG, "Open was not a success: " +
+                                result.getStatus() + " for filename " + filename);
+                        setClosed(filename);
+                    } else {
+                        Log.d(TAG, "Open successful: " + filename);
+                    }
+                });
             } catch (RuntimeException e) {
                 // catch runtime exceptions here - they should not happen, but they do.
                 // mark the file as closed so it can be attempted to be opened again.
@@ -267,20 +263,16 @@ public class SnapshotCoordinator implements Snapshots {
             try {
                 return new CoordinatedPendingResult<>(
                         Games.Snapshots.open(googleApiClient, filename, createIfNotFound,
-                                conflictPolicy),
-                        new ResultListener() {
-                            @Override
-                            public void onResult(Result result) {
-                                // if open failed, set the file to closed, otherwise, keep it open.
-                                if (!result.getStatus().isSuccess()) {
-                                    Log.d(TAG, "Open was not a success: " +
-                                            result.getStatus() + " for filename " + filename);
-                                    setClosed(filename);
-                                } else {
-                                    Log.d(TAG, "Open successful: " + filename);
-                                }
-                            }
-                        });
+                                conflictPolicy), result -> {
+                    // if open failed, set the file to closed, otherwise, keep it open.
+                    if (!result.getStatus().isSuccess()) {
+                        Log.d(TAG, "Open was not a success: " +
+                                result.getStatus() + " for filename " + filename);
+                        setClosed(filename);
+                    } else {
+                        Log.d(TAG, "Open successful: " + filename);
+                    }
+                });
             } catch (RuntimeException e) {
                 setClosed(filename);
                 throw e;
@@ -298,22 +290,18 @@ public class SnapshotCoordinator implements Snapshots {
             setIsOpening(snapshotMetadata.getUniqueName());
             try {
                 return new CoordinatedPendingResult<>(
-                        Games.Snapshots.open(googleApiClient, snapshotMetadata),
-                        new ResultListener() {
-                            @Override
-                            public void onResult(Result result) {
-                                // if open failed, set the file to closed, otherwise, keep it open.
-                                if (!result.getStatus().isSuccess()) {
-                                    Log.d(TAG, "Open was not a success: " +
-                                            result.getStatus() + " for filename " +
-                                            snapshotMetadata.getUniqueName());
-                                    setClosed(snapshotMetadata.getUniqueName());
-                                } else {
-                                    Log.d(TAG, "Open was successful: " +
-                                            snapshotMetadata.getUniqueName());
-                                }
-                            }
-                        });
+                        Games.Snapshots.open(googleApiClient, snapshotMetadata), result -> {
+                    // if open failed, set the file to closed, otherwise, keep it open.
+                    if (!result.getStatus().isSuccess()) {
+                        Log.d(TAG, "Open was not a success: " +
+                                result.getStatus() + " for filename " +
+                                snapshotMetadata.getUniqueName());
+                        setClosed(snapshotMetadata.getUniqueName());
+                    } else {
+                        Log.d(TAG, "Open was successful: " +
+                                snapshotMetadata.getUniqueName());
+                    }
+                });
             } catch (RuntimeException e) {
                 setClosed(snapshotMetadata.getUniqueName());
                 throw e;
@@ -332,22 +320,18 @@ public class SnapshotCoordinator implements Snapshots {
             setIsOpening(snapshotMetadata.getUniqueName());
             try {
                 return new CoordinatedPendingResult<>(Games.Snapshots.open(
-                        googleApiClient, snapshotMetadata, conflictPolicy),
-                        new ResultListener() {
-                            @Override
-                            public void onResult(Result result) {
-                                // if open failed, set the file to closed, otherwise, keep it open.
-                                if (!result.getStatus().isSuccess()) {
-                                    Log.d(TAG, "Open was not a success: " +
-                                            result.getStatus() + " for filename " +
-                                            snapshotMetadata.getUniqueName());
-                                    setClosed(snapshotMetadata.getUniqueName());
-                                } else {
-                                    Log.d(TAG, "Open was successful: " +
-                                            snapshotMetadata.getUniqueName());
-                                }
-                            }
-                        });
+                        googleApiClient, snapshotMetadata, conflictPolicy), result -> {
+                    // if open failed, set the file to closed, otherwise, keep it open.
+                    if (!result.getStatus().isSuccess()) {
+                        Log.d(TAG, "Open was not a success: " +
+                                result.getStatus() + " for filename " +
+                                snapshotMetadata.getUniqueName());
+                        setClosed(snapshotMetadata.getUniqueName());
+                    } else {
+                        Log.d(TAG, "Open was successful: " +
+                                snapshotMetadata.getUniqueName());
+                    }
+                });
             } catch (RuntimeException e) {
                 setClosed(snapshotMetadata.getUniqueName());
                 throw e;
@@ -368,16 +352,12 @@ public class SnapshotCoordinator implements Snapshots {
             try {
                 return new CoordinatedPendingResult<>(
                         Games.Snapshots.commitAndClose(googleApiClient, snapshot,
-                                snapshotMetadataChange),
-                        new ResultListener() {
-                            @Override
-                            public void onResult(Result result) {
-                                // even if commit and close fails, the file is closed.
-                                Log.d(TAG, "CommitAndClose complete, closing " +
-                                        snapshot.getMetadata().getUniqueName());
-                                setClosed(snapshot.getMetadata().getUniqueName());
-                            }
-                        });
+                                snapshotMetadataChange), result -> {
+                    // even if commit and close fails, the file is closed.
+                    Log.d(TAG, "CommitAndClose complete, closing " +
+                            snapshot.getMetadata().getUniqueName());
+                    setClosed(snapshot.getMetadata().getUniqueName());
+                });
             } catch (RuntimeException e) {
                 setClosed(snapshot.getMetadata().getUniqueName());
                 throw e;
@@ -397,12 +377,9 @@ public class SnapshotCoordinator implements Snapshots {
             try {
                 return new CoordinatedPendingResult<>(
                         Games.Snapshots.delete(googleApiClient, snapshotMetadata),
-                        new ResultListener() {
-                            @Override
-                            public void onResult(Result result) {
-                                // deleted files are closed.
-                                setClosed(snapshotMetadata.getUniqueName());
-                            }
+                        result -> {
+                            // deleted files are closed.
+                            setClosed(snapshotMetadata.getUniqueName());
                         });
             } catch (RuntimeException e) {
                 setClosed(snapshotMetadata.getUniqueName());
@@ -424,12 +401,9 @@ public class SnapshotCoordinator implements Snapshots {
             try {
                 return new CoordinatedPendingResult<>(
                         Games.Snapshots.resolveConflict(googleApiClient, conflictId, snapshot),
-                        new ResultListener() {
-                            @Override
-                            public void onResult(Result result) {
-                                if (!result.getStatus().isSuccess()) {
-                                    setClosed(snapshot.getMetadata().getUniqueName());
-                                }
+                        result -> {
+                            if (!result.getStatus().isSuccess()) {
+                                setClosed(snapshot.getMetadata().getUniqueName());
                             }
                         });
             } catch (RuntimeException e) {
@@ -486,13 +460,7 @@ public class SnapshotCoordinator implements Snapshots {
         @Override
         public void cancel() {
             if (listener != null) {
-                listener.onResult(new Result() {
-
-                    @Override
-                    public Status getStatus() {
-                        return new Status(CommonStatusCodes.CANCELED);
-                    }
-                });
+                listener.onResult(() -> new Status(CommonStatusCodes.CANCELED));
             }
             innerResult.cancel();
         }
@@ -505,14 +473,11 @@ public class SnapshotCoordinator implements Snapshots {
         @Override
         public void setResultCallback(@NonNull ResultCallback<? super T> resultCallback) {
             final ResultCallback<? super T> theCallback = resultCallback;
-            innerResult.setResultCallback(new ResultCallback<T>() {
-                @Override
-                public void onResult(@NonNull T t) {
-                    if (listener != null) {
-                        listener.onResult(t);
-                    }
-                    theCallback.onResult(t);
+            innerResult.setResultCallback(t -> {
+                if (listener != null) {
+                    listener.onResult(t);
                 }
+                theCallback.onResult(t);
             });
         }
 
@@ -520,14 +485,11 @@ public class SnapshotCoordinator implements Snapshots {
         public void setResultCallback(@NonNull ResultCallback<? super T> resultCallback,
                                       long l, @NonNull TimeUnit timeUnit) {
             final ResultCallback<? super T> theCallback = resultCallback;
-            innerResult.setResultCallback(new ResultCallback<T>() {
-                @Override
-                public void onResult(@NonNull T t) {
-                    if (listener != null) {
-                        listener.onResult(t);
-                    }
-                    theCallback.onResult(t);
+            innerResult.setResultCallback(t -> {
+                if (listener != null) {
+                    listener.onResult(t);
                 }
+                theCallback.onResult(t);
             }, l, timeUnit);
         }
     }
@@ -551,20 +513,10 @@ public class SnapshotCoordinator implements Snapshots {
                 try {
                     latch.await();
                 } catch (InterruptedException e) {
-                    return new Result() {
-                        @Override
-                        public Status getStatus() {
-                            return Canceled;
-                        }
-                    };
+                    return () -> Canceled;
                 }
             }
-            return new Result() {
-                @Override
-                public Status getStatus() {
-                    return canceled ? Canceled : Success;
-                }
-            };
+            return () -> canceled ? Canceled : Success;
         }
 
         @NonNull
@@ -574,20 +526,10 @@ public class SnapshotCoordinator implements Snapshots {
                 try {
                     latch.await(l, timeUnit);
                 } catch (InterruptedException e) {
-                    return new Result() {
-                        @Override
-                        public Status getStatus() {
-                            return Canceled;
-                        }
-                    };
+                    return () -> Canceled;
                 }
             }
-            return new Result() {
-                @Override
-                public Status getStatus() {
-                    return canceled ? Canceled : Success;
-                }
-            };
+            return () -> canceled ? Canceled : Success;
         }
 
         @Override
@@ -624,31 +566,16 @@ public class SnapshotCoordinator implements Snapshots {
                     protected Void doInBackground(Object... params) {
                         try {
                             latch.await();
-                            resultCallback.onResult(new Result() {
-                                @Override
-                                public com.google.android.gms.common.api.Status getStatus() {
-                                    return canceled ? Canceled : Success;
-                                }
-                            });
+                            resultCallback.onResult((Result) () -> canceled ? Canceled : Success);
                         } catch (InterruptedException e) {
-                            resultCallback.onResult(new Result() {
-                                @Override
-                                public com.google.android.gms.common.api.Status getStatus() {
-                                    return Canceled;
-                                }
-                            });
+                            resultCallback.onResult((Result) () -> Canceled);
                         }
                         return null;
                     }
                 };
                 task.execute(latch);
             } else {
-                resultCallback.onResult(new Result() {
-                    @Override
-                    public com.google.android.gms.common.api.Status getStatus() {
-                        return canceled ? Canceled : Success;
-                    }
-                });
+                resultCallback.onResult((Result) () -> canceled ? Canceled : Success);
             }
         }
 
@@ -676,31 +603,16 @@ public class SnapshotCoordinator implements Snapshots {
                     protected Void doInBackground(Object... params) {
                         try {
                             latch.await(l, timeUnit);
-                            resultCallback.onResult(new Result() {
-                                @Override
-                                public com.google.android.gms.common.api.Status getStatus() {
-                                    return canceled ? Canceled : Success;
-                                }
-                            });
+                            resultCallback.onResult((Result) () -> canceled ? Canceled : Success);
                         } catch (InterruptedException e) {
-                            resultCallback.onResult(new Result() {
-                                @Override
-                                public com.google.android.gms.common.api.Status getStatus() {
-                                    return Canceled;
-                                }
-                            });
+                            resultCallback.onResult((Result) () -> Canceled);
                         }
                         return null;
                     }
                 };
                 task.execute(latch);
             } else {
-                resultCallback.onResult(new Result() {
-                    @Override
-                    public com.google.android.gms.common.api.Status getStatus() {
-                        return canceled ? Canceled : Success;
-                    }
-                });
+                resultCallback.onResult((Result) () -> canceled ? Canceled : Success);
             }
         }
     }

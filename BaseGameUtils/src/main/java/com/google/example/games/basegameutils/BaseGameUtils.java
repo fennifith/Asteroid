@@ -36,8 +36,9 @@ public class BaseGameUtils {
      * @param fallbackErrorMessage a generic error message to display if the failure cannot be resolved.
      * @return true if the connection failure is resolved, false otherwise.
      */
-    public static boolean resolveConnectionFailure(Activity activity,
-                                                   GoogleApiClient client, ConnectionResult result, int requestCode,
+    public static boolean resolveConnectionFailure(Activity activity, GoogleApiClient client,
+                                                   ConnectionResult result,
+                                                   int requestCode,
                                                    int fallbackErrorMessage) {
 
         if (result.hasResolution()) {
