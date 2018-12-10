@@ -1,7 +1,6 @@
 package james.asteroid.activities;
 
 import android.animation.ValueAnimator;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -45,7 +44,9 @@ import james.asteroid.utils.ImageUtils;
 import james.asteroid.utils.PreferenceUtils;
 import james.asteroid.views.GameView;
 
-public class MainActivity extends AppCompatActivity implements GameView.GameListener, View.OnClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class MainActivity extends AppCompatActivity
+        implements GameView.GameListener, View.OnClickListener,
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private TextView titleView;
     private TextView highScoreView;
@@ -87,7 +88,6 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
     private boolean isPaused;
     private Bitmap play;
     private Bitmap pause;
-    private Bitmap stop;
 
     private GoogleApiClient apiClient;
     private AchievementUtils achievementUtils;
@@ -208,141 +208,109 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
         musicEnabled = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(this, R.drawable.ic_music_enabled), colorAccent, colorPrimary);
         musicDisabled = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(this, R.drawable.ic_music_disabled), colorAccent, colorPrimary);
         musicView.setImageBitmap(isMusic ? musicEnabled : musicDisabled);
-        musicView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                isMusic = !isMusic;
-                prefs.edit().putBoolean(PreferenceUtils.PREF_MUSIC, isMusic).apply();
-                musicView.setImageBitmap(isMusic ? musicEnabled : musicDisabled);
+        musicView.setOnClickListener(view -> {
+            isMusic = !isMusic;
+            prefs.edit().putBoolean(PreferenceUtils.PREF_MUSIC, isMusic).apply();
+            musicView.setImageBitmap(isMusic ? musicEnabled : musicDisabled);
 
-                if (isMusic) player.start();
-                else player.pause();
+            if (isMusic) player.start();
+            else player.pause();
 
-                if (isSound)
-                    soundPool.play(buttonId, 1, 1, 0, 0, 1);
-            }
+            if (isSound)
+                soundPool.play(buttonId, 1, 1, 0, 0, 1);
         });
 
         isSound = prefs.getBoolean(PreferenceUtils.PREF_SOUND, true);
         soundEnabled = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(this, R.drawable.ic_sound_enabled), colorAccent, colorPrimary);
         soundDisabled = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(this, R.drawable.ic_sound_disabled), colorAccent, colorPrimary);
         soundView.setImageBitmap(isSound ? soundEnabled : soundDisabled);
-        soundView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                isSound = !isSound;
-                prefs.edit().putBoolean(PreferenceUtils.PREF_SOUND, isSound).apply();
-                soundView.setImageBitmap(isSound ? soundEnabled : soundDisabled);
-                if (isSound)
-                    soundPool.play(buttonId, 1, 1, 0, 0, 1);
-            }
+        soundView.setOnClickListener(view -> {
+            isSound = !isSound;
+            prefs.edit().putBoolean(PreferenceUtils.PREF_SOUND, isSound).apply();
+            soundView.setImageBitmap(isSound ? soundEnabled : soundDisabled);
+            if (isSound)
+                soundPool.play(buttonId, 1, 1, 0, 0, 1);
         });
 
         achievementsView.setImageBitmap(ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(this, R.drawable.ic_achievements), colorAccent, colorPrimary));
-        achievementsView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivityForResult(Games.Achievements.getAchievementsIntent(apiClient), 0);
-                if (isSound)
-                    soundPool.play(buttonId, 1, 1, 0, 0, 1);
-            }
+        achievementsView.setOnClickListener(view -> {
+            startActivityForResult(Games.Achievements.getAchievementsIntent(apiClient), 0);
+            if (isSound)
+                soundPool.play(buttonId, 1, 1, 0, 0, 1);
         });
 
         rankView.setImageBitmap(ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(this, R.drawable.ic_rank), colorAccent, colorPrimary));
-        rankView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivityForResult(Games.Leaderboards.getLeaderboardIntent(apiClient, getString(R.string.leaderboard_high_score)), 0);
-                if (isSound)
-                    soundPool.play(buttonId, 1, 1, 0, 0, 1);
-            }
+        rankView.setOnClickListener(view -> {
+            startActivityForResult(Games.Leaderboards.getLeaderboardIntent(apiClient, getString(R.string.leaderboard_high_score)), 0);
+            if (isSound)
+                soundPool.play(buttonId, 1, 1, 0, 0, 1);
         });
 
         gamesView.setImageBitmap(ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(this, R.drawable.ic_game), colorAccent, colorPrimary));
-        gamesView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (apiClient != null) {
-                    if (apiClient.isConnected()) {
-                        new AlertDialog.Builder(MainActivity.this)
-                                .setTitle(R.string.title_sign_out)
-                                .setMessage(R.string.msg_sign_out)
-                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        Games.signOut(apiClient);
-                                        if (apiClient.isConnected())
-                                            apiClient.disconnect();
+        gamesView.setOnClickListener(view -> {
+            if (apiClient != null) {
+                if (apiClient.isConnected()) {
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setTitle(R.string.title_sign_out)
+                            .setMessage(R.string.msg_sign_out)
+                            .setPositiveButton(android.R.string.yes, (dialogInterface, i) -> {
+                                Games.signOut(apiClient);
+                                if (apiClient.isConnected())
+                                    apiClient.disconnect();
 
-                                        achievementsView.setVisibility(View.GONE);
-                                        rankView.setVisibility(View.GONE);
-                                        dialogInterface.dismiss();
-                                    }
-                                })
-                                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        dialogInterface.dismiss();
-                                    }
-                                })
-                                .create()
-                                .show();
-                    } else apiClient.connect();
-                }
+                                achievementsView.setVisibility(View.GONE);
+                                rankView.setVisibility(View.GONE);
+                                dialogInterface.dismiss();
+                            })
+                            .setNegativeButton(android.R.string.no, (dialogInterface, i) -> dialogInterface.dismiss())
+                            .create()
+                            .show();
+                } else apiClient.connect();
             }
         });
 
         aboutView.setImageBitmap(ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(this, R.drawable.ic_info), colorAccent, colorPrimary));
-        aboutView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!gameView.isPlaying() && (animator == null || !animator.isStarted())) {
-                    gameView.setOnClickListener(null);
-                    //TODO: tutorial screen
-                    animateTitle(false);
-                    if (isSound)
-                        soundPool.play(hissId, 1, 1, 0, 0, 1);
-                }
+        aboutView.setOnClickListener(view -> {
+            if (!gameView.isPlaying() && (animator == null || !animator.isStarted())) {
+                gameView.setOnClickListener(null);
+                //TODO: tutorial screen
+                animateTitle(false);
+                if (isSound)
+                    soundPool.play(hissId, 1, 1, 0, 0, 1);
             }
         });
 
         play = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(this, R.drawable.ic_play), colorAccent, colorPrimary);
         pause = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(this, R.drawable.ic_pause), colorAccent, colorPrimary);
-        stop = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(this, R.drawable.ic_stop), colorAccent, colorPrimary);
+        Bitmap stop = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(this, R.drawable.ic_stop), colorAccent, colorPrimary);
 
         pauseView.setImageBitmap(pause);
-        pauseView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                isPaused = !isPaused;
-                if (isPaused) {
-                    pauseView.setImageBitmap(play);
-                    if (!gameView.isTutorial())
-                        stopView.setVisibility(View.VISIBLE);
-                    gameView.onPause();
-                } else {
-                    pauseView.setImageBitmap(pause);
-                    pauseView.setAlpha(1f);
-                    stopView.setVisibility(View.GONE);
-                    gameView.onResume();
-                }
+        pauseView.setOnClickListener(view -> {
+            isPaused = !isPaused;
+            if (isPaused) {
+                pauseView.setImageBitmap(play);
+                if (!gameView.isTutorial())
+                    stopView.setVisibility(View.VISIBLE);
+                gameView.onPause();
+            } else {
+                pauseView.setImageBitmap(pause);
+                pauseView.setAlpha(1f);
+                stopView.setVisibility(View.GONE);
+                gameView.onResume();
             }
         });
 
         stopView.setImageBitmap(stop);
-        stopView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (isPaused) {
-                    pauseView.setImageBitmap(pause);
-                    pauseView.setAlpha(1f);
-                    gameView.onResume();
-                    isPaused = false;
-                }
-
-                onStop(gameView.score);
-                gameView.stop();
+        stopView.setOnClickListener(view -> {
+            if (isPaused) {
+                pauseView.setImageBitmap(pause);
+                pauseView.setAlpha(1f);
+                gameView.onResume();
+                isPaused = false;
             }
+
+            onStop(gameView.score);
+            gameView.stop();
         });
 
         int highScore = prefs.getInt(PreferenceUtils.PREF_HIGH_SCORE, 0);
@@ -370,12 +338,9 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
         animator.setDuration(750);
         animator.setStartDelay(500);
         animator.setInterpolator(new AccelerateInterpolator());
-        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                titleView.setText(appName.substring(0, (int) ((float) valueAnimator.getAnimatedValue() * appName.length())));
-                hintView.setText(hintStart.substring(0, (int) ((float) valueAnimator.getAnimatedValue() * hintStart.length())));
-            }
+        animator.addUpdateListener(valueAnimator -> {
+            titleView.setText(appName.substring(0, (int) ((float) valueAnimator.getAnimatedValue() * appName.length())));
+            hintView.setText(hintStart.substring(0, (int) ((float) valueAnimator.getAnimatedValue() * hintStart.length())));
         });
         animator.start();
 
@@ -419,22 +384,15 @@ public class MainActivity extends AppCompatActivity implements GameView.GameList
                     new AlertDialog.Builder(this)
                             .setTitle(R.string.title_animation_speed)
                             .setMessage(R.string.desc_animation_speed)
-                            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    try {
-                                        startActivity(new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS));
-                                    } catch (Exception ignored) {
-                                    }
-                                    dialogInterface.dismiss();
+                            .setPositiveButton(android.R.string.ok, (dialogInterface, i) -> {
+                                try {
+                                    startActivity(new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS));
+                                } catch (Exception ignored) {
                                 }
+                                dialogInterface.dismiss();
                             })
-                            .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    dialogInterface.dismiss();
-                                }
-                            })
+                            .setNegativeButton(android.R.string.cancel, (dialogInterface, i) ->
+                                    dialogInterface.dismiss())
                             .create()
                             .show();
                 }

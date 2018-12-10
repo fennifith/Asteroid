@@ -74,12 +74,7 @@ public class BackgroundService extends WallpaperService {
 
         private SharedPreferences prefs;
         private Handler handler = new Handler();
-        private Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                draw(getSurfaceHolder());
-            }
-        };
+        private Runnable runnable = () -> draw(getSurfaceHolder());
 
         public BackgroundEngine() {
             prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());

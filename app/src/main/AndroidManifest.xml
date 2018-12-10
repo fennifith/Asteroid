@@ -27,8 +27,8 @@
 
         <activity
             android:name=".activities.BackgroundSettingsActivity"
-            android:theme="@style/TransparentTheme"
-            android:exported="true" />
+            android:exported="true"
+            android:theme="@style/TransparentTheme" />
 
         <service
             android:name=".services.BackgroundService"

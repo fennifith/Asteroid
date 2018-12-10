@@ -4,7 +4,7 @@ import android.graphics.Rect;
 
 public class ProjectileData {
 
-    public float x, y, xDiff, yDiff = 4;
+    public float x, y, xDiff, yDiff;
 
     public ProjectileData(float x, float y, float xDiff, float yDiff) {
         this.x = x;

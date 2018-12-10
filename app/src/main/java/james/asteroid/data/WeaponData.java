@@ -27,7 +27,7 @@ public class WeaponData {
             new WeaponData(R.string.weapon_lasers, R.drawable.ic_weapon_laser_sprayer, R.raw.laser, 3, 8, 20),
             new WeaponData(R.string.weapon_particle, R.drawable.ic_weapon_particle, R.raw.particle, 10, 1, 40),
             new WeaponData(R.string.weapon_particles, R.drawable.ic_weapon_particles, R.raw.particle, 10, 3, 45),
-            new WeaponData(R.string.weapon_particless, R.drawable.ic_weapon_particless, R.raw.particle, 10, 5, 50)
+            new WeaponData(R.string.weapon_particles2, R.drawable.ic_weapon_particless, R.raw.particle, 10, 5, 50)
     };
 
     private int nameRes;
