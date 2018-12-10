@@ -6,8 +6,8 @@ All in-game graphics are either stored as vector drawables or drawn during runti
 
 |Main Screen|Gameplay|
 |--------|--------|
-|![img](https://theandroidmaster.github.io/apps/asteroid/images/main.png)
-|![img](https://theandroidmaster.github.io/apps/asteroid/images/gameplay.png)|
+|![img](./.github/main.png)
+|![img](./.github/gameplay.png)|
 
 
 ## Install
@@ -20,7 +20,7 @@ All in-game graphics are either stored as vector drawables or drawn during runti
 ## License
 
 ```
-Copyright 2017 James Fenn
+Copyright 2018 James Fenn
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
