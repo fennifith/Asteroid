@@ -1,0 +1,31 @@
+language: android
+android:
+  components:
+  - tools
+  - platform-tools
+  - build-tools-28.0.3
+  - android-28
+  - extra-google-google_play_services
+  - extra-google-m2repository
+  - extra-android-m2repository
+jdk:
+  - oraclejdk8
+before_install:
+  - openssl aes-256-cbc -K $encrypted_bb7fd5d8e773_key -iv $encrypted_bb7fd5d8e773_iv -in secrets.tar.enc -out secrets.tar -d
+  - tar -xvf secrets.tar --overwrite
+  - chmod +x gradlew
+script:
+  - if [ "$TRAVIS_BRANCH" = "develop" ]; then ./gradlew build; fi
+  - if [ "$TRAVIS_BRANCH" = "master" ]; then ./gradlew publish; fi
+before_deploy:
+  - export RELEASE_VERSION=$(./gradlew -q :app:printVersionName)
+  - export RELEASE_CHANGELOG=$(cat app/src/main/play/release-notes/en-US/default.txt)
+  - export RELEASE_FILE="app/build/outputs/apk/release/*.apk"
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script:
+      - mkdir .scripts && wget "https://gist.githubusercontent.com/fennifith/664f534ead7336adf420d5afa72628f9/raw/travis-github-release.sh" -O .scripts/github-release.sh
+      - chmod +x .scripts/github-release.sh && ./.scripts/github-release.sh
+    on:
+      branch: master
