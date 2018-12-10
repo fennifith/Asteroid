@@ -10,9 +10,10 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.support.annotation.DrawableRes;
-import android.support.graphics.drawable.VectorDrawableCompat;
-import android.support.v4.graphics.drawable.DrawableCompat;
+
+import androidx.annotation.DrawableRes;
+import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 
 public class ImageUtils {
 

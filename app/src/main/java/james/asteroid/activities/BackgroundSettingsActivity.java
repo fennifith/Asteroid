@@ -1,31 +1,25 @@
 package james.asteroid.activities;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.AppCompatSpinner;
-import android.support.v7.widget.SwitchCompat;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CompoundButton;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatSpinner;
+import androidx.appcompat.widget.SwitchCompat;
 import james.asteroid.R;
 import james.asteroid.services.BackgroundService;
 
 public class BackgroundSettingsActivity extends AppCompatActivity {
-
-    private AppCompatSpinner speed;
-    private SwitchCompat asteroids;
-    private AppCompatSpinner asteroidSpeed;
-    private AppCompatSpinner asteroidInterval;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_background_settings);
 
-        speed = findViewById(R.id.speed);
+        AppCompatSpinner speed = findViewById(R.id.speed);
         ArrayAdapter<CharSequence> speedsAdapter = ArrayAdapter.createFromResource(this, R.array.pref_speeds, R.layout.support_simple_spinner_dropdown_item);
         speedsAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
         speed.setAdapter(speedsAdapter);
@@ -41,16 +35,12 @@ public class BackgroundSettingsActivity extends AppCompatActivity {
             }
         });
 
-        asteroids = findViewById(R.id.asteroids);
+        SwitchCompat asteroids = findViewById(R.id.asteroids);
         asteroids.setChecked(BackgroundService.isAsteroids(this));
-        asteroids.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                BackgroundService.setAsteroids(BackgroundSettingsActivity.this, b);
-            }
-        });
+        asteroids.setOnCheckedChangeListener((compoundButton, b) ->
+                BackgroundService.setAsteroids(BackgroundSettingsActivity.this, b));
 
-        asteroidSpeed = findViewById(R.id.asteroidSpeed);
+        AppCompatSpinner asteroidSpeed = findViewById(R.id.asteroidSpeed);
         asteroidSpeed.setAdapter(speedsAdapter);
         asteroidSpeed.setSelection(BackgroundService.getAsteroidSpeed(this) - 1);
         asteroidSpeed.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -64,7 +54,7 @@ public class BackgroundSettingsActivity extends AppCompatActivity {
             }
         });
 
-        asteroidInterval = findViewById(R.id.asteroidInterval);
+        AppCompatSpinner asteroidInterval = findViewById(R.id.asteroidInterval);
         ArrayAdapter<CharSequence> intervalsAdapter = ArrayAdapter.createFromResource(this, R.array.pref_intervals, R.layout.support_simple_spinner_dropdown_item);
         intervalsAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
         asteroidInterval.setAdapter(intervalsAdapter);

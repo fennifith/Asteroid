@@ -28,7 +28,7 @@
     <string name="weapon_lasers">Laser Sprayer</string>
     <string name="weapon_particle">Particle Cannon</string>
     <string name="weapon_particles">Particle Cannons</string>
-    <string name="weapon_particless">More Particle Cannons</string>
+    <string name="weapon_particles2">More Particle Cannons</string>
     <string name="weapon">Weapon: %s</string>
     <string name="msg_out_of_ammo">Out of ammo :(</string>
     <string name="msg_weapon_equipped">Weapon Equipped: %s</string>
@@ -48,10 +48,11 @@
     <string name="msg_move_near_ammunition">Move your ship near the ammunition box to pick it up.</string>
     <string name="msg_move_near_weapon">Move your ship near the weapon to pick it up.</string>
     <string name="msg_sign_in_error">An error occurred while trying to sign in… :P</string>
-    <string name="title_sign_out">Sign Out?</string>
-    <string name="msg_sign_out">Are you sure you want to sign out of Play Games?</string>
+    <string name="title_sign_out">Sign out?</string>
+    <string name="msg_sign_out">Are you sure you want to sign out of Google Play Games?</string>
     <string name="title_animation_speed">Animation Speed</string>
-    <string name="desc_animation_speed">It appears that your phone\'s animator duration has been modified in developer settings. It is highly recommended that you revert this setting to its original value in order for the game to run properly.</string>
+    <string name="desc_animation_speed">It appears that your phone\'s animator duration has been modified in developer settings.
+        It is highly recommended that you revert this setting to its original value in order for the game to run properly.</string>
 
     <string name="pref_background_speed">Background Speed</string>
     <string name="pref_background_asteroids">Show Asteroids</string>

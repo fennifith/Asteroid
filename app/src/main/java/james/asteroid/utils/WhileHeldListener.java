@@ -3,7 +3,6 @@ package james.asteroid.utils;
 import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
 
 public abstract class WhileHeldListener implements View.OnTouchListener, Runnable {
 

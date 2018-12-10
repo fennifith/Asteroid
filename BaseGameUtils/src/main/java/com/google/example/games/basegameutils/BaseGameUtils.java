@@ -1,9 +1,11 @@
 package com.google.example.games.basegameutils;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.IntentSender;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -14,12 +16,12 @@ import com.google.android.gms.games.GamesActivityResultCodes;
 public class BaseGameUtils {
 
     /**
-     * Show an {@link android.app.AlertDialog} with an 'OK' button and a message.
+     * Show an {@link AlertDialog} with an 'OK' button and a message.
      *
      * @param activity the Activity in which the Dialog should be displayed.
      * @param message  the message to display in the Dialog.
      */
-    public static void showAlert(Activity activity, String message) {
+    public static void showAlert(AppCompatActivity activity, String message) {
         (new AlertDialog.Builder(activity)).setMessage(message)
                 .setNeutralButton(android.R.string.ok, null).create().show();
     }
@@ -36,8 +38,9 @@ public class BaseGameUtils {
      * @param fallbackErrorMessage a generic error message to display if the failure cannot be resolved.
      * @return true if the connection failure is resolved, false otherwise.
      */
-    public static boolean resolveConnectionFailure(Activity activity,
-                                                   GoogleApiClient client, ConnectionResult result, int requestCode,
+    public static boolean resolveConnectionFailure(AppCompatActivity activity, GoogleApiClient client,
+                                                   ConnectionResult result,
+                                                   int requestCode,
                                                    int fallbackErrorMessage) {
 
         if (result.hasResolution()) {
@@ -74,7 +77,7 @@ public class BaseGameUtils {
      * @param resIds the resource IDs to check for placeholders
      * @return true if sample is set up correctly; false otherwise.
      */
-    public static boolean verifySampleSetup(Activity activity, int... resIds) {
+    public static boolean verifySampleSetup(AppCompatActivity activity, int... resIds) {
         StringBuilder problems = new StringBuilder();
         boolean problemFound = false;
         problems.append("The following set up problems were found:\n\n");
@@ -112,7 +115,7 @@ public class BaseGameUtils {
      * @param actResp          the response code from onActivityResult.
      * @param errorDescription the resource id of a String for a generic error message.
      */
-    public static void showActivityResultError(Activity activity, int requestCode, int actResp, int errorDescription) {
+    public static void showActivityResultError(AppCompatActivity activity, int requestCode, int actResp, int errorDescription) {
         if (activity == null) {
             Log.e("BaseGameUtils", "*** No Activity. Can't show failure dialog!");
             return;
@@ -154,9 +157,9 @@ public class BaseGameUtils {
      *
      * @param activity the Activity in which the Dialog should be displayed.
      * @param text     the message to display on the Dialog.
-     * @return an instance of {@link android.app.AlertDialog}
+     * @return an instance of {@link AlertDialog}
      */
-    public static Dialog makeSimpleDialog(Activity activity, String text) {
+    public static Dialog makeSimpleDialog(AppCompatActivity activity, String text) {
         return (new AlertDialog.Builder(activity)).setMessage(text)
                 .setNeutralButton(android.R.string.ok, null).create();
     }
@@ -167,9 +170,9 @@ public class BaseGameUtils {
      * @param activity the Activity in which the Dialog should be displayed.
      * @param title    the title to display on the dialog.
      * @param text     the message to display on the Dialog.
-     * @return an instance of {@link android.app.AlertDialog}
+     * @return an instance of {@link AlertDialog}
      */
-    public static Dialog makeSimpleDialog(Activity activity, String title, String text) {
+    public static Dialog makeSimpleDialog(AppCompatActivity activity, String title, String text) {
         return (new AlertDialog.Builder(activity))
                 .setTitle(title)
                 .setMessage(text)

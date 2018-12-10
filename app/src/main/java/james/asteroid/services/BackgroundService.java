@@ -8,9 +8,9 @@ import android.graphics.Paint;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.service.wallpaper.WallpaperService;
-import android.support.v4.content.ContextCompat;
 import android.view.SurfaceHolder;
 
+import androidx.core.content.ContextCompat;
 import james.asteroid.R;
 import james.asteroid.data.drawer.AsteroidDrawer;
 import james.asteroid.data.drawer.BackgroundDrawer;
@@ -74,12 +74,7 @@ public class BackgroundService extends WallpaperService {
 
         private SharedPreferences prefs;
         private Handler handler = new Handler();
-        private Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                draw(getSurfaceHolder());
-            }
-        };
+        private Runnable runnable = () -> draw(getSurfaceHolder());
 
         public BackgroundEngine() {
             prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());

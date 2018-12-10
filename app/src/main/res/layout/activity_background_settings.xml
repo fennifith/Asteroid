@@ -6,11 +6,11 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp"
         android:layout_gravity="center_vertical"
         android:background="#000"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -29,14 +29,14 @@
                 android:text="@string/pref_background_speed"
                 android:textColor="#FFF" />
 
-            <android.support.v7.widget.AppCompatSpinner
+            <androidx.appcompat.widget.AppCompatSpinner
                 android:id="@+id/speed"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
         </LinearLayout>
 
-        <android.support.v7.widget.SwitchCompat
+        <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/asteroids"
             android:layout_width="match_parent"
             android:layout_height="42dp"
@@ -62,7 +62,7 @@
                 android:text="@string/pref_background_asteroid_speed"
                 android:textColor="#FFF" />
 
-            <android.support.v7.widget.AppCompatSpinner
+            <androidx.appcompat.widget.AppCompatSpinner
                 android:id="@+id/asteroidSpeed"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
@@ -86,7 +86,7 @@
                 android:text="@string/pref_background_asteroid_interval"
                 android:textColor="#FFF" />
 
-            <android.support.v7.widget.AppCompatSpinner
+            <androidx.appcompat.widget.AppCompatSpinner
                 android:id="@+id/asteroidInterval"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />

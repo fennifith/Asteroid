@@ -1,11 +1,11 @@
 package james.asteroid.utils;
 
 import android.content.Context;
-import android.support.annotation.StringRes;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.games.Games;
 
+import androidx.annotation.StringRes;
 import james.asteroid.R;
 import james.asteroid.data.WeaponData;
 import james.asteroid.views.GameView;
