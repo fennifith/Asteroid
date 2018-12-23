@@ -36,6 +36,13 @@ public class AsteroidDrawer extends DrawerData {
         asteroidBitmap2 = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(context, R.drawable.ic_asteroid_two), colorAccent, colorPrimary);
     }
 
+    /**
+     * Set whether the drawer should generate its own asteroids at
+     * a set interval.
+     *
+     * @param shouldMakeAsteroids Whether the drawer should generate
+     *                            its own asteroids.
+     */
     public void setMakeAsteroids(boolean shouldMakeAsteroids) {
         this.shouldMakeAsteroids = shouldMakeAsteroids;
         asteroidLength = 3000;
@@ -43,6 +50,14 @@ public class AsteroidDrawer extends DrawerData {
             asteroids.clear();
     }
 
+    /**
+     * Determine if there is an asteroid intersecting the given position
+     * on the canvas; if so, return it.
+     *
+     * @param position      The position Rect to check if an asteroid intersects.
+     * @return              The AsteroidData if it intersects the given position;
+     *                      null if there is nothing there.
+     */
     public AsteroidData asteroidAt(Rect position) {
         for (AsteroidData asteroid : asteroids) {
             if (asteroid.position != null && position.intersect(asteroid.position))
@@ -52,6 +67,12 @@ public class AsteroidDrawer extends DrawerData {
         return null;
     }
 
+    /**
+     * Destroy a given asteroid; generate an explosion of particles in its place.
+     *
+     * @param asteroid      The asteroid to obliterate. Kaboom! Kablowie! Kapow!
+     *                      Badabadoosh!
+     */
     public void destroy(AsteroidData asteroid) {
         asteroids.remove(asteroid);
 

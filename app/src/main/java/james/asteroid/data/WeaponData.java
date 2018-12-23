@@ -48,10 +48,22 @@ public class WeaponData {
         this.capacity = capacity;
     }
 
+    /**
+     * Gets the user-facing name of the weapon.
+     *
+     * @param context       An active context instance.
+     * @return              The name of the weapon; a String.
+     */
     public String getName(Context context) {
         return context.getString(nameRes);
     }
 
+    /**
+     * Get the Bitmap image of the weapon.
+     *
+     * @param context       An active context instance.
+     * @return              The Bitmap image of the weapon.
+     */
     public Bitmap getBitmap(Context context) {
         if (bitmap == null)
             bitmap = ImageUtils.gradientBitmap(ImageUtils.getVectorBitmap(context, drawableRes), ContextCompat.getColor(context, R.color.colorAccent), ContextCompat.getColor(context, R.color.colorPrimary));
@@ -59,6 +71,14 @@ public class WeaponData {
         return bitmap;
     }
 
+    /**
+     * Fire the weapon; generate an amount of ProjectileDatas at the given
+     * x/y coordinates and add them to the passed List instance.
+     *
+     * @param projectiles       The current list of projectiles being drawn.
+     * @param x                 The current x coordinate of the player.
+     * @param y                 The current y coordinate of the player.
+     */
     public void fire(List<ProjectileData> projectiles, float x, float y) {
         for (int i = 0; i < spray; i++) {
             float xDiff = (((float) (i + 1) / (spray + 1)) - 0.5f) / 2;
@@ -72,6 +92,12 @@ public class WeaponData {
         soundId = soundPool.load(context, soundRes, 1);
     }
 
+    /**
+     * Load the weapon sounds to be played when they are fired.
+     *
+     * @param context           An active context instance.
+     * @param soundPool         The SoundPool to load the sounds into.
+     */
     public static void loadSounds(Context context, SoundPool soundPool) {
         for (WeaponData weapon : WEAPONS) {
             weapon.loadSoundRes(context, soundPool);

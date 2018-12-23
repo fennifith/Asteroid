@@ -247,6 +247,9 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
         }
     }
 
+    /**
+     * Start a new game! Wheeeeeeeeee!
+     */
     public void play() {
         isPlaying = true;
         score = 0;
@@ -275,6 +278,9 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
             listener.onStart(isTutorial);
     }
 
+    /**
+     * Stop the game, reset everything.
+     */
     public void stop() {
         isPlaying = false;
         isTutorial = false;
@@ -309,10 +315,21 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
         animator1.start();
     }
 
+    /**
+     * Determine if a game is being played.
+     *
+     * @return Whether a game is being played.
+     */
     public boolean isPlaying() {
         return isPlaying;
     }
 
+    /**
+     * Determine whether the tutorial is currently
+     * being played.
+     *
+     * @return Whether the tutorial is currently being played.
+     */
     public boolean isTutorial() {
         return isTutorial;
     }

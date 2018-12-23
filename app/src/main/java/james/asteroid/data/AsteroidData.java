@@ -19,6 +19,17 @@ public class AsteroidData {
         yDiff = (float) (Math.random() * 6) + 1;
     }
 
+    /**
+     * Calculates the position Matrix of the asteroid to draw
+     * in the next frame.
+     *
+     * @param speed     The speed of the asteroid.
+     * @param width     The width of the drawing canvas.
+     * @param height    The height of the drawing canvas.
+     * @return          The position Matrix of the asteroid.
+     *                  Equals null if the asteroid can no longer
+     *                  be drawn within the given width/height.
+     */
     public Matrix next(float speed, int width, int height) {
         if ((y - asteroidBitmap.getHeight()) < height) {
             y += yDiff * speed;

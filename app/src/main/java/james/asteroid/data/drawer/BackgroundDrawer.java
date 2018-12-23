@@ -25,6 +25,11 @@ public class BackgroundDrawer extends DrawerData {
         clouds.add(new CloudData(cloudPaint, 1, 1));
     }
 
+    /**
+     * Add a particle to the drawer.
+     *
+     * @param particle          The particle to add.
+     */
     public void addParticle(ParticleData particle) {
         particles.add(particle);
     }

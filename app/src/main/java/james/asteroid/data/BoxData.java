@@ -20,10 +20,24 @@ public class BoxData {
         yDiff = (float) (Math.random() * 3) + 1;
     }
 
+    /**
+     * Opens the box; gives the player whatever is inside it.
+     */
     public void open() {
         listener.onBoxOpened(this);
     }
 
+    /**
+     * Calculates the position Matrix of the box to draw in the
+     * next frame.
+     *
+     * @param speed         The speed of the box.
+     * @param width         The width of the drawing canvas.
+     * @param height        The height of the drawing canvas.
+     * @return              The position Matrix of the box. Equals
+     *                      null if the box can no longer be drawn
+     *                      within the given width/height.
+     */
     public Matrix next(float speed, int width, int height) {
         if ((y - boxBitmap.getHeight()) < height) {
             y += yDiff * speed;

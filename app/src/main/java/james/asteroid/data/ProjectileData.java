@@ -13,6 +13,16 @@ public class ProjectileData {
         this.yDiff = yDiff;
     }
 
+    /**
+     * Calculates the Rect to draw the projectile in for the next frame.
+     *
+     * @param speed         The speed of the projectile.
+     * @param width         The width of the drawing canvas.
+     * @param height        The height of the drawing canvas.
+     * @return              The Rect to draw the projectile in for the
+     *                      next frame - equals null if it can no longer
+     *                      be drawn within the given width/height.
+     */
     public Rect next(float speed, int width, int height) {
         if (x >= 0 && x <= 1 && y >= 0 && y <= height) {
             x += xDiff * speed;

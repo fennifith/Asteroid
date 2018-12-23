@@ -29,6 +29,18 @@ public class ParticleData extends DrawerData {
         rotateDiff = (float) Math.random() * 10;
     }
 
+    /**
+     * Calculates the next Rect to draw the particle in for the
+     * next frame.
+     *
+     * @param speed         The speed of the particle.
+     * @param width         The width of the drawing canvas.
+     * @param height        The height of the drawing canvas.
+     * @return              The Rect to draw the particle in for
+     *                      the next frame - equals null if it can
+     *                      no longer be drawn within the given
+     *                      width/height.
+     */
     public Rect next(float speed, int width, int height) {
         if (y >= 0 && y <= height && x >= 0 && x <= width) {
             y += yDiff * speed;
@@ -48,6 +60,15 @@ public class ParticleData extends DrawerData {
         return new Rect((int) left - (int) (size / 2), (int) y - (int) (size / 2), (int) left + (int) (size / 2), (int) y + (int) (size / 2));
     }
 
+    /**
+     * Draws the particle on the given canvas.
+     *
+     * @param canvas        The canvas to draw the particle on.
+     * @param speed         The speed of the particle.
+     * @return              Whether the particle was drawn; false
+     *                      if it can no longer be drawn within
+     *                      the visible area of the canvas.
+     */
     @Override
     public boolean draw(Canvas canvas, float speed) {
         Rect rect = next(speed, canvas.getWidth(), canvas.getHeight());
