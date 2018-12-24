@@ -232,6 +232,8 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                                         GameView.this.weapon = weapon;
                                         if (weapon.capacity < ammo)
                                             ammo = weapon.capacity;
+
+                                        messages.drawMessage(String.format(getContext().getString(R.string.msg_weapon_equipped), weapon.getName(getContext())));
                                         new Handler(Looper.getMainLooper()).post(() -> {
                                             if (listener != null)
                                                 listener.onWeaponUpgraded(weapon);
@@ -268,14 +270,20 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
 
                     AsteroidData asteroid = asteroids.asteroidAt(position);
                     if (asteroid != null) {
-                        new Handler(Looper.getMainLooper()).post(() -> {
-                            if (listener != null) {
-                                listener.onAsteroidCrashed();
-                                listener.onStop(score);
-                            }
+                        if (tutorial > TUTORIAL_NONE) {
+                            messages.clear();
+                            messages.drawMessage(getContext(), R.string.msg_dont_get_hit);
+                            asteroids.destroy(asteroid);
+                        } else {
+                            new Handler(Looper.getMainLooper()).post(() -> {
+                                if (listener != null) {
+                                    listener.onAsteroidCrashed();
+                                    listener.onStop(score);
+                                }
 
-                            stop();
-                        });
+                                stop();
+                            });
+                        }
                     }
 
                     for (final BoxData box : new ArrayList<>(boxes)) {
@@ -444,8 +452,10 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                                     listener.onAmmoReplenished();
                             });
                         }));
-                    } else if (listener != null)
+                    } else if (listener != null) {
+                        messages.drawMessage(getContext(), R.string.msg_out_of_ammo);
                         listener.onOutOfAmmo();
+                    }
                     return false;
                 } else projectileTime = System.currentTimeMillis();
 

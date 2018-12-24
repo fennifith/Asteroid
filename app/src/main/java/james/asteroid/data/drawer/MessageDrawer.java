@@ -9,7 +9,6 @@ import java.util.List;
 
 import androidx.annotation.StringRes;
 import james.asteroid.data.DrawerData;
-import james.asteroid.utils.ConversionUtils;
 
 public class MessageDrawer extends DrawerData {
 
@@ -62,7 +61,7 @@ public class MessageDrawer extends DrawerData {
 
         if (messages.size() > 0) {
             String str = messages.get(0);
-            long delay = Math.max(3000, str.length() * 200);
+            long delay = Math.max(3000, str.length() * 100);
             if (diff < delay) {
                 if (diff < MESSAGE_TRANSITION) {
                     paint.setAlpha((int) (255 * ((float) diff / MESSAGE_TRANSITION)));
@@ -73,7 +72,7 @@ public class MessageDrawer extends DrawerData {
                 float width = paint.measureText(str);
                 int offsetX = (int) ((width / 2) - (width * ((float) diff / delay)));
 
-                canvas.drawText(messages.get(0), (canvas.getWidth() / 2) + offsetX, canvas.getHeight() - ConversionUtils.getPixelsFromDp(64), paint);
+                canvas.drawText(messages.get(0), (canvas.getWidth() / 2) + offsetX, canvas.getHeight() / 2, paint);
             } else {
                 messages.remove(0);
                 if (messages.size() > 0)
