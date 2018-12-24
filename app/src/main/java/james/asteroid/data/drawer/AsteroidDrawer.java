@@ -51,6 +51,21 @@ public class AsteroidDrawer extends DrawerData {
     }
 
     /**
+     * Make a new asteroid. Like magic.
+     */
+    public void makeNew() {
+        asteroidTime = System.currentTimeMillis();
+        asteroids.add(new AsteroidData(Math.round(Math.random()) == 0 ? asteroidBitmap : asteroidBitmap2));
+    }
+
+    /**
+     * @return The amount of asteroids currently visible on the screen.
+     */
+    public int size() {
+        return asteroids.size();
+    }
+
+    /**
      * Determine if there is an asteroid intersecting the given position
      * on the canvas; if so, return it.
      *
@@ -102,10 +117,8 @@ public class AsteroidDrawer extends DrawerData {
                 particles.remove(particle);
         }
 
-        if (shouldMakeAsteroids && System.currentTimeMillis() - asteroidTime > asteroidLength) {
-            asteroidTime = System.currentTimeMillis();
-            asteroids.add(new AsteroidData(Math.round(Math.random()) == 0 ? asteroidBitmap : asteroidBitmap2));
-        }
+        if (shouldMakeAsteroids && System.currentTimeMillis() - asteroidTime > asteroidLength)
+            makeNew();
 
         return isPassed;
     }

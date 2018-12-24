@@ -273,7 +273,7 @@ public class MainActivity extends AppCompatActivity
         aboutView.setOnClickListener(view -> {
             if (!gameView.isPlaying() && (animator == null || !animator.isStarted())) {
                 gameView.setOnClickListener(null);
-                //TODO: tutorial screen
+                gameView.play(true);
                 animateTitle(false);
                 if (isSound)
                     soundPool.play(hissId, 1, 1, 0, 0, 1);
@@ -516,9 +516,9 @@ public class MainActivity extends AppCompatActivity
     public void onClick(View view) {
         if (!gameView.isPlaying() && (animator == null || !animator.isStarted())) {
             gameView.setOnClickListener(null);
-            //TODO: tutorial screen
-            //if (prefs.getBoolean(PreferenceUtils.PREF_TUTORIAL, true))
-            gameView.play();
+
+            gameView.play(prefs.getBoolean(PreferenceUtils.PREF_TUTORIAL, true));
+
             animateTitle(false);
             if (isSound)
                 soundPool.play(hissId, 1, 1, 0, 0, 1);

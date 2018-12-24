@@ -31,6 +31,7 @@ import james.asteroid.data.ProjectileData;
 import james.asteroid.data.WeaponData;
 import james.asteroid.data.drawer.AsteroidDrawer;
 import james.asteroid.data.drawer.BackgroundDrawer;
+import james.asteroid.data.drawer.MessageDrawer;
 import james.asteroid.utils.FontUtils;
 import james.asteroid.utils.ImageUtils;
 
@@ -57,6 +58,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
 
     private BackgroundDrawer background;
     private AsteroidDrawer asteroids;
+    private MessageDrawer messages;
 
     private ValueAnimator animator;
     private GameListener listener;
@@ -66,11 +68,13 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
     private float ammo;
     private ValueAnimator ammoAnimator;
 
-    private boolean isTutorial;
-    private boolean isMoved;
-    private boolean isUpgraded;
-    private boolean isAsteroid;
-    private boolean isReplenished;
+    private int tutorial;
+
+    private static final int TUTORIAL_NONE = 0;
+    private static final int TUTORIAL_MOVE = 1;
+    private static final int TUTORIAL_UPGRADE = 2;
+    private static final int TUTORIAL_ASTEROID = 3;
+    private static final int TUTORIAL_REPLENISH = 4;
 
     public GameView(Context context) {
         this(context, null);
@@ -104,8 +108,16 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
         cloudPaint.setStyle(Paint.Style.FILL);
         cloudPaint.setAntiAlias(true);
 
+        Paint textPaint = new Paint();
+        textPaint.setColor(colorPrimaryLight);
+        textPaint.setStyle(Paint.Style.FILL);
+        textPaint.setTextAlign(Paint.Align.CENTER);
+        textPaint.setTextSize(20);
+        textPaint.setTypeface(FontUtils.getTypeface(context));
+
         background = new BackgroundDrawer(paint, cloudPaint);
         asteroids = new AsteroidDrawer(getContext(), colorAccent, colorPrimary, paint, accentPaint);
+        messages = new MessageDrawer(textPaint);
 
         projectiles = new ArrayList<>();
 
@@ -129,6 +141,43 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
 
                 canvas.drawColor(Color.BLACK);
 
+                // ----- tutorial nonsense ------
+
+                if (boxes.size() == 0 && tutorial == TUTORIAL_UPGRADE) {
+                    BoxData box = new BoxData(WeaponData.WEAPONS[0].getBitmap(getContext()), box2 -> {
+                        weapon = WeaponData.WEAPONS[0];
+                        ammo = weapon.capacity;
+                        tutorial++;
+                        new Handler(Looper.getMainLooper()).post(() -> {
+                            if (listener != null)
+                                listener.onWeaponUpgraded(weapon);
+                        });
+                    });
+
+                    box.x = 0.5f;
+                    box.yDiff = 2;
+                    boxes.add(box);
+                    messages.drawMessage(getContext(), R.string.msg_move_near_weapon);
+                } else if (asteroids.size() == 0 && tutorial == TUTORIAL_ASTEROID) {
+                    asteroids.makeNew();
+                    messages.drawMessage(getContext(), R.string.msg_destroy_asteroid);
+                } else if (boxes.size() == 0 && tutorial == TUTORIAL_REPLENISH) {
+                    BoxData box = new BoxData(boxBitmap, box2 -> {
+                       ammo = weapon.capacity;
+                       messages.drawMessage(getContext(), R.string.msg_come_back_anytime);
+                       tutorial = TUTORIAL_NONE;
+                       asteroids.setMakeAsteroids(true);
+                        new Handler(Looper.getMainLooper()).post(() -> listener.onTutorialFinish());
+                    });
+
+                    box.x = 0.5f;
+                    box.yDiff = 2;
+                    boxes.add(box);
+                    messages.drawMessage(getContext(), R.string.msg_move_near_ammunition);
+                }
+
+                // ----- end tutorial nonsense --------
+
                 background.draw(canvas, speed);
                 if (asteroids.draw(canvas, speed)) {
                     new Handler(Looper.getMainLooper()).post(() -> listener.onAsteroidPassed());
@@ -138,19 +187,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                     Matrix matrix = box.next(speed, canvas.getWidth(), canvas.getHeight());
                     if (matrix != null)
                         canvas.drawBitmap(box.boxBitmap, matrix, paint);
-                    else if (isTutorial) {
-                        boxes.remove(box);
-                        BoxData box2 = new BoxData(box.boxBitmap, box.listener);
-                        box2.x = 0.5f;
-                        box2.yDiff = 2;
-                        boxes.add(box2);
-                        new Handler(Looper.getMainLooper()).post(() -> {
-                            if (!isUpgraded)
-                                FontUtils.toast(getContext(), getContext().getString(R.string.msg_move_near_weapon));
-                            else
-                                FontUtils.toast(getContext(), getContext().getString(R.string.msg_move_near_ammunition));
-                        });
-                    } else boxes.remove(box);
+                    else boxes.remove(box);
                 }
 
                 float left = canvas.getWidth() * shipPositionX;
@@ -176,6 +213,9 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                         if (isPlaying && asteroid != null) {
                             projectiles.remove(projectile);
                             asteroids.destroy(asteroid);
+
+                            if (tutorial == TUTORIAL_ASTEROID) // more tutorial nonsense
+                                tutorial++;
 
                             speed += 0.02;
                             new Handler(Looper.getMainLooper()).post(() -> {
@@ -215,7 +255,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                 }
 
                 if (isPlaying) {
-                    if (!isTutorial || isUpgraded) {
+                    if (tutorial == TUTORIAL_NONE || tutorial > TUTORIAL_UPGRADE) { // kinda tutorial nonsense but don't worry about it
                         accentPaint.setAlpha(100);
                         canvas.drawRect(0, (float) canvas.getHeight() - 5, (float) canvas.getWidth(), (float) canvas.getHeight(), accentPaint);
                         accentPaint.setAlpha(255);
@@ -242,6 +282,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                     }
                 }
 
+                messages.draw(canvas, speed);
                 surfaceHolder.unlockCanvasAndPost(canvas);
             }
         }
@@ -249,15 +290,24 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
 
     /**
      * Start a new game! Wheeeeeeeeee!
+     *
+     * @param isTutorial        Should this game start with a tutorial?
      */
-    public void play() {
+    public void play(boolean isTutorial) {
+        if (isTutorial) { // tutorial. nonsense.
+            if (tutorial == TUTORIAL_NONE) {
+                tutorial = TUTORIAL_MOVE;
+                messages.drawMessage(getContext(), R.string.msg_press_to_move);
+            }
+        } else tutorial = TUTORIAL_NONE;
+
         isPlaying = true;
         score = 0;
         speed = 1;
         ammo = 15;
         shipPositionX = 0.5f;
         shipRotation = 0;
-        asteroids.setMakeAsteroids(true);
+        asteroids.setMakeAsteroids(!isTutorial);
         projectiles.clear();
         boxes.clear();
 
@@ -270,7 +320,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
         animator.addUpdateListener(valueAnimator -> shipPositionY = (float) valueAnimator.getAnimatedValue());
         animator.start();
 
-        if (!isTutorial)
+        if (!isTutorial) // TUTORIAL NONSENSE!!!!!
             weapon = WeaponData.WEAPONS[0];
         setOnTouchListener(this);
 
@@ -283,7 +333,6 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
      */
     public void stop() {
         isPlaying = false;
-        isTutorial = false;
         setOnTouchListener(null);
         asteroids.setMakeAsteroids(false);
 
@@ -297,12 +346,12 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
             shipPositionY = (float) valueAnimator.getAnimatedValue();
             shipRotation = 720 * valueAnimator.getAnimatedFraction();
         });
-        if (isTutorial) {
+        if (tutorial > TUTORIAL_NONE) { // probably also tutorial nonsense
             animator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    FontUtils.toast(getContext(), getContext().getString(R.string.msg_dont_get_hit));
-                    play();
+                    messages.drawMessage(getContext(), R.string.msg_dont_get_hit);
+                    play(true);
                 }
             });
         }
@@ -331,7 +380,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
      * @return Whether the tutorial is currently being played.
      */
     public boolean isTutorial() {
-        return isTutorial;
+        return tutorial > TUTORIAL_NONE;
     }
 
     public void onPause() {
@@ -359,7 +408,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
     public boolean onTouch(View v, MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                if (System.currentTimeMillis() - projectileTime < 350 && (!isTutorial || isUpgraded)) {
+                if (System.currentTimeMillis() - projectileTime < 350 && (tutorial == TUTORIAL_NONE || tutorial > TUTORIAL_UPGRADE)) {
                     if (ammoAnimator != null && ammoAnimator.isStarted())
                         ammoAnimator.end();
                     if (ammo > 0) {
@@ -372,12 +421,10 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                         ammoAnimator.setInterpolator(new DecelerateInterpolator());
                         ammoAnimator.addUpdateListener(valueAnimator -> ammo = (float) valueAnimator.getAnimatedValue());
                         ammoAnimator.start();
-                    } else if (isTutorial && boxes.size() == 0) {
-                        FontUtils.toast(getContext(), getContext().getString(R.string.msg_too_many_projectiles));
-                        FontUtils.toast(getContext(), getContext().getString(R.string.msg_free_refill));
+                    } else if (tutorial > TUTORIAL_NONE && boxes.size() == 0) { // definitely tutorial nonsense
+                        messages.drawMessage(getContext(), R.string.msg_too_many_projectiles);
+                        messages.drawMessage(getContext(), R.string.msg_free_refill);
                         boxes.add(new BoxData(boxBitmap, box -> {
-                            isReplenished = true;
-
                             new Handler(Looper.getMainLooper()).post(() -> {
                                 ammoAnimator = ValueAnimator.ofFloat(ammo, weapon.capacity);
                                 ammoAnimator.setDuration(250);
@@ -424,11 +471,10 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                 if (animator != null && animator.isStarted())
                     animator.cancel();
 
-                if (isTutorial && !isMoved) {
+                if (tutorial == TUTORIAL_MOVE) { // tutorial nonsense! yay!
                     if (System.currentTimeMillis() - projectileTime > 500)
-                        isMoved = true;
-                    else
-                        FontUtils.toast(getContext(), getContext().getString(R.string.msg_hold_distance));
+                        tutorial++;
+                    else messages.drawMessage(getContext(), R.string.msg_hold_distance);
                 }
 
                 float newX = shipPositionX + ((shipPositionX - shipPositionStartX) / 1.5f);
