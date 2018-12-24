@@ -48,6 +48,14 @@ public class MessageDrawer extends DrawerData {
             messageTime = System.currentTimeMillis();
     }
 
+    /**
+     * Clears all pending messages.
+     */
+    public void clear() {
+        while (messages.size() > 1)
+            messages.remove(1);
+    }
+
     @Override
     public boolean draw(Canvas canvas, float speed) {
         long diff = Math.abs(System.currentTimeMillis() - messageTime);
@@ -62,7 +70,10 @@ public class MessageDrawer extends DrawerData {
                     paint.setAlpha((int) (255 * ((float) (delay - diff) / MESSAGE_TRANSITION)));
                 } else paint.setAlpha(255);
 
-                canvas.drawText(messages.get(0), canvas.getWidth() / 2, canvas.getHeight() - ConversionUtils.getPixelsFromDp(64), paint);
+                float width = paint.measureText(str);
+                int offsetX = (int) ((width / 2) - (width * ((float) diff / delay)));
+
+                canvas.drawText(messages.get(0), (canvas.getWidth() / 2) + offsetX, canvas.getHeight() - ConversionUtils.getPixelsFromDp(64), paint);
             } else {
                 messages.remove(0);
                 if (messages.size() > 0)

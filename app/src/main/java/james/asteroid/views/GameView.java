@@ -157,13 +157,16 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                     box.x = 0.5f;
                     box.yDiff = 2;
                     boxes.add(box);
+                    messages.clear();
                     messages.drawMessage(getContext(), R.string.msg_move_near_weapon);
                 } else if (asteroids.size() == 0 && tutorial == TUTORIAL_ASTEROID) {
                     asteroids.makeNew();
+                    messages.clear();
                     messages.drawMessage(getContext(), R.string.msg_destroy_asteroid);
                 } else if (boxes.size() == 0 && tutorial == TUTORIAL_REPLENISH) {
                     BoxData box = new BoxData(boxBitmap, box2 -> {
                        ammo = weapon.capacity;
+                       messages.clear();
                        messages.drawMessage(getContext(), R.string.msg_come_back_anytime);
                        tutorial = TUTORIAL_NONE;
                        asteroids.setMakeAsteroids(true);
@@ -173,6 +176,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                     box.x = 0.5f;
                     box.yDiff = 2;
                     boxes.add(box);
+                    messages.clear();
                     messages.drawMessage(getContext(), R.string.msg_move_near_ammunition);
                 }
 
@@ -297,6 +301,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
         if (isTutorial) { // tutorial. nonsense.
             if (tutorial == TUTORIAL_NONE) {
                 tutorial = TUTORIAL_MOVE;
+                messages.clear();
                 messages.drawMessage(getContext(), R.string.msg_press_to_move);
             }
         } else tutorial = TUTORIAL_NONE;
@@ -350,6 +355,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
             animator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
+                    messages.clear();
                     messages.drawMessage(getContext(), R.string.msg_dont_get_hit);
                     play(true);
                 }
@@ -422,6 +428,7 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                         ammoAnimator.addUpdateListener(valueAnimator -> ammo = (float) valueAnimator.getAnimatedValue());
                         ammoAnimator.start();
                     } else if (tutorial > TUTORIAL_NONE && boxes.size() == 0) { // definitely tutorial nonsense
+                        messages.clear();
                         messages.drawMessage(getContext(), R.string.msg_too_many_projectiles);
                         messages.drawMessage(getContext(), R.string.msg_free_refill);
                         boxes.add(new BoxData(boxBitmap, box -> {
@@ -474,7 +481,10 @@ public class GameView extends SurfaceView implements Runnable, View.OnTouchListe
                 if (tutorial == TUTORIAL_MOVE) { // tutorial nonsense! yay!
                     if (System.currentTimeMillis() - projectileTime > 500)
                         tutorial++;
-                    else messages.drawMessage(getContext(), R.string.msg_hold_distance);
+                    else {
+                        messages.clear();
+                        messages.drawMessage(getContext(), R.string.msg_hold_distance);
+                    }
                 }
 
                 float newX = shipPositionX + ((shipPositionX - shipPositionStartX) / 1.5f);
