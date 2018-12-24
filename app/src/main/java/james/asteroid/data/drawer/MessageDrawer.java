@@ -60,7 +60,7 @@ public class MessageDrawer extends DrawerData {
                     paint.setAlpha((int) (255 * ((float) diff / MESSAGE_TRANSITION)));
                 } else if (delay - diff < MESSAGE_TRANSITION) {
                     paint.setAlpha((int) (255 * ((float) (delay - diff) / MESSAGE_TRANSITION)));
-                } else paint.setAlpha(1);
+                } else paint.setAlpha(255);
 
                 canvas.drawText(messages.get(0), canvas.getWidth() / 2, canvas.getHeight() - ConversionUtils.getPixelsFromDp(64), paint);
             } else {
