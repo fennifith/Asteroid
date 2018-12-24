@@ -1,1 +1,4 @@
-- Did something.
+- added clouds to the background
+- fancy explosions when an asteroid is hit
+- improved performance / organization
+- updated dependencies, AndroidX migration (thanks @TacoTheDank)
