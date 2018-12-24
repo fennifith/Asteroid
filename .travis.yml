@@ -29,3 +29,11 @@ deploy:
     script: .scripts/github-release.sh
     on:
       branch: master
+  - provider: releases
+    skip_cleanup: true
+    overwrite: true
+    file_glob: true
+    file: "${RELEASE_FILE}"
+    tag_name: "${RELEASE_VERSION}"
+    on:
+      branch: master
