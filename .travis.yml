@@ -1,13 +1,13 @@
 language: android
 android:
   components:
-  - tools
-  - platform-tools
-  - build-tools-28.0.3
-  - android-28
-  - extra-google-google_play_services
-  - extra-google-m2repository
-  - extra-android-m2repository
+    - tools
+    - platform-tools
+    - build-tools-28.0.3
+    - android-28
+    - extra-google-google_play_services
+    - extra-google-m2repository
+    - extra-android-m2repository
 jdk:
   - oraclejdk8
 before_install:
@@ -15,15 +15,18 @@ before_install:
   - tar -xvf secrets.tar --overwrite
   - chmod +x gradlew
 script:
-  - if [ "$TRAVIS_BRANCH" = "develop" ]; then ./gradlew build; fi
-  - if [ "$TRAVIS_BRANCH" = "master" ]; then ./gradlew publish; fi
+  - if [ "$TRAVIS_TAG" != "" ]; then ./gradlew publish; else ./gradlew build; fi
 before_deploy:
-  - export RELEASE_VERSION=$(./gradlew -q :app:printVersionName)
+  - export RELEASE_VERSION=$TRAVIS_TAG
   - export RELEASE_CHANGELOG=$(cat app/src/main/play/release-notes/en-US/default.txt)
-  - export RELEASE_FILE="app/build/outputs/apk/*/app-release.apk"
-  - mkdir .scripts && wget "https://gist.githubusercontent.com/fennifith/664f534ead7336adf420d5afa72628f9/raw/travis-github-release.sh" -O .scripts/github-release.sh
-  - chmod +x .scripts/github-release.sh && sh .scripts/github-release.sh
+  - export RELEASE_FILE="app/build/outputs/apk/*/*.apk"
 deploy:
+  - provider: script
+    skip_cleanup: true
+    script: bash ./.scripts/deploy.sh
+    on:
+      branch: master
+      tags: true
   - provider: releases
     api_key: "${GITHUB_TOKEN}"
     skip_cleanup: true
@@ -33,3 +36,4 @@ deploy:
     tag_name: "${RELEASE_VERSION}"
     on:
       branch: master
+      tags: true
